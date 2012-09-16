@@ -560,7 +560,7 @@ if __name__ == "__main__":
     terrain.toSurfaceImage("./resources/terrainsurfaceimage.png", fileformat="PNG", overwrite=True)
 
     print "Running diamond-square with rescale & saturate + generating weightmap"
-    terrain.fromDiamondsquare(2, 10, -5, -5, 10)
+    terrain.fromDiamondsquare(32, 10, -5, -5, 10)
     terrain.rescale(-20, 50)
     terrain.saturate(-5)
     terrain.toFile("./resources/terrain4.ntf", overwrite=True)
