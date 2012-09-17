@@ -1,3 +1,11 @@
 # python files
 *.pyc
 *.pyd
+
+#generated files
+Applications/4part/generated
+Applications/4part/*.txml
+Applications/ruka/generated
+Applications/ruka/*.txml
+Applications/syote/generated
+Applications/syote/*.txml
