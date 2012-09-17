@@ -385,7 +385,7 @@ if __name__ == "__main__": # if run standalone
             world.createEntity_Staticmesh(1, "Tree"+str(world.TXML.getCurrentEntityID()),
                                           mesh="plane.mesh",
                                           material="",
-                                          transform="%f,%f,%f,0,0,0,1,1,1" % (y, z+6, x)) # yxz vanha, z korkeus
+                                          transform="%f,%f,%f,0,0,0,1,1,1" % (y, z+6, x))
 
     world.TXML.endScene()
     world.toFile("./testworld.txml", overwrite=True)
