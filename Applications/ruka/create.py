@@ -1,0 +1,92 @@
+#!/usr/bin/python
+
+import TerrainGenerator
+import WorldGenerator
+import MaterialGenerator
+import TextureGenerator
+
+prefix         = ""
+avatar_prefix  = ""
+env_prefix     = ""
+
+terrainSlice = "T5311A", "S5422B", "T5133G", "S5244H"
+terrainSuffix = ".xyz"
+
+
+def create_assets():
+    for i in terrainSlices:
+        inputFile = i + terrainSuffix
+        t = TerrainGenerator.TerrainGenerator()
+        t.fromFile(inputFile)
+        t.adjustHeight(-300.0)
+        outputFile = "./" + i + ".ntf" 
+        t.toFile(outputFile, overwrite=True)
+        
+        print "Generating weightmap for the ASC terrain: " + i
+        weightFile = "./" + i + "weight.png"
+        t.toWeightmap(weightFile, fileformat="PNG", overwrite=True)
+        
+        print "Generating material for " + i
+        m = MaterialGenerator.Material(i)
+        m.createMaterial_4channelTerrain("terrain", "sand.png", "grass.png", "rock.png", "", weightFile)        
+        materialFile = "./" + i + ".material"
+        m.toFile(materialFile, overwrite=True)
+        
+    print "Generating terrain textures"
+    t = TextureGenerator.TextureGenerator()
+    t.createSingleColorTexture(30,100,30,50)
+    t.toImage("./grass.png", "PNG", overwrite=True)
+    t.createSingleColorTexture(90,83,73,50)
+    t.toImage("./rock.png", "PNG", overwrite=True)
+    t.createSingleColorTexture(160,136,88,70)
+    t.toImage("./sand.png", "PNG", overwrite=True)
+        
+    
+
+def create_world():
+    t_width  = 16*((1500/16)+1)
+    t_height = 16*((1500/16)+1)
+    w = WorldGenerator.WorldGenerator()
+    w.TXML.startScene()
+    
+    side = 608
+    # position using x, z coordinates and the lenght on one slices side
+    spot1 = "%f,0,%f,0,0,0,1,1,1" % (0, 0)
+    spot2 = "%f,0,%f,0,0,0,1,1,1" % (-side, 0)
+    spot3 = "%f,0,%f,0,0,0,1,1,1" % (-side, -side)
+    spot4 = "%f,0,%f,0,0,0,1,1,1" % (0, -side)
+    
+    
+    
+    
+    w.createEntity_Terrain(1, "terrain1", transform=spot1,
+                              width=t_width, height=t_height,
+                              material=prefix+"terrain1.material",
+                              heightmap=prefix+"terrain1.ntf")
+    w.createEntity_Terrain(1, "terrain2", transform=spot2,
+                              width=t_width, height=t_height,
+                              material=prefix+"terrain2.material",
+                              heightmap=prefix+"terrain2.ntf")
+    w.createEntity_Terrain(1, "terrain3", transform=spot3,
+                              width=t_width, height=t_height,
+                              material=prefix+"terrain4.material",
+                              heightmap=prefix+"terrain3.ntf")
+    w.createEntity_Terrain(1, "terrain4", transform=spot4,
+                              width=t_width, height=t_height,
+                              material=prefix+"terrain4.material",
+                              heightmap=prefix+"terrain4.ntf")
+							  
+    w.createEntity_SimpleSky(1, "SimpleSky",
+                                texture = env_prefix+"rex_sky_front.dds;" + env_prefix+"rex_sky_back.dds;" + \
+                                          env_prefix+"rex_sky_left.dds;" + env_prefix+"rex_sky_right.dds;" + \
+                                          env_prefix+"rex_sky_top.dds;" + env_prefix+"rex_sky_bottom.dds")
+    w.createEntity_Avatar(1, "AvatarApp",
+                             avatar_prefix+"avatarapplication.js;"+ \
+                             avatar_prefix+"simpleavatar.js;" + \
+                             avatar_prefix+"exampleavataraddon.js")
+    w.createEntity_Waterplane(1, "Waterplane", (side*2), (side*2), 0.0)
+    w.TXML.endScene()
+    w.toFile("./Terrain.txml", overwrite=True)
+
+create_assets()
+create_world()
