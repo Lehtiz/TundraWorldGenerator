@@ -64,23 +64,14 @@ def create_world():
     spot3 = "%f,0,%f,0,0,0,1,1,1" % (-side, -side)
     spot4 = "%f,0,%f,0,0,0,1,1,1" % (0, -side)
     
-    w.createEntity_Terrain(1, "terrain1", transform=spot1,
-                              width=t_width, height=t_height,
-                              material=prefix+"terrain1.material",
-                              heightmap=prefix+"terrain1.ntf")
-    w.createEntity_Terrain(1, "terrain2", transform=spot2,
-                              width=t_width, height=t_height,
-                              material=prefix+"terrain2.material",
-                              heightmap=prefix+"terrain2.ntf")
-    w.createEntity_Terrain(1, "terrain3", transform=spot3,
-                              width=t_width, height=t_height,
-                              material=prefix+"terrain4.material",
-                              heightmap=prefix+"terrain3.ntf")
-    w.createEntity_Terrain(1, "terrain4", transform=spot4,
-                              width=t_width, height=t_height,
-                              material=prefix+"terrain4.material",
-                              heightmap=prefix+"terrain4.ntf")
-							  
+    spot = spot1, spot2, spot3, spot4
+    
+    for i, e in enumerate(terrainSlice):
+        w.createEntity_Terrain(1, e, transform=spot[i],
+                                  width=t_width, height=t_height,
+                                  material=prefix + e + ".material",
+                                  heightmap=prefix + e + ".ntf")
+ 
     w.createEntity_SimpleSky(1, "SimpleSky",
                                 texture = env_prefix+"rex_sky_front.dds;" + env_prefix+"rex_sky_back.dds;" + \
                                           env_prefix+"rex_sky_left.dds;" + env_prefix+"rex_sky_right.dds;" + \
