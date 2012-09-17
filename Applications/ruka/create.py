@@ -10,7 +10,7 @@ avatar_prefix  = ""
 env_prefix     = ""
 
 
-terrainSlice = "T5311A", "S5422B", "T5133G", "S5244H"
+terrainSlice = "S5422B", "T5311A", "T5133G", "S5244H"
 terrainSuffix = ".xyz"
 
 patchSize = 0
