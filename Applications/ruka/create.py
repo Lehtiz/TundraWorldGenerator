@@ -12,15 +12,22 @@ env_prefix     = ""
 terrainSlice = "T5311A", "S5422B", "T5133G", "S5244H"
 terrainSuffix = ".xyz"
 
+patchSize = 0
+patchCount = 0
 
 def create_assets():
-    for i in terrainSlices:
+    global patchSize
+    global patchCount
+    for i in terrainSlice:
         inputFile = i + terrainSuffix
         t = TerrainGenerator.TerrainGenerator()
         t.fromFile(inputFile)
         t.adjustHeight(-300.0)
         outputFile = "./" + i + ".ntf" 
         t.toFile(outputFile, overwrite=True)
+        
+        patchCount = t.width
+        patchSize = t.cPatchSize
         
         print "Generating weightmap for the ASC terrain: " + i
         weightFile = "./" + i + "weight.png"
@@ -49,15 +56,13 @@ def create_world():
     w = WorldGenerator.WorldGenerator()
     w.TXML.startScene()
     
-    side = 608
-    # position using x, z coordinates and the lenght on one slices side
+    # position using x, z coordinates and the width of one slice
+    #print(patchCount * patchSize)
+    side = patchCount * patchSize
     spot1 = "%f,0,%f,0,0,0,1,1,1" % (0, 0)
     spot2 = "%f,0,%f,0,0,0,1,1,1" % (-side, 0)
     spot3 = "%f,0,%f,0,0,0,1,1,1" % (-side, -side)
     spot4 = "%f,0,%f,0,0,0,1,1,1" % (0, -side)
-    
-    
-    
     
     w.createEntity_Terrain(1, "terrain1", transform=spot1,
                               width=t_width, height=t_height,
