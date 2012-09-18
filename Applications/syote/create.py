@@ -90,22 +90,8 @@ def create_world():
                              avatar_prefix+"simpleavatar.js;" + \
                              avatar_prefix+"exampleavataraddon.js")
     w.createEntity_Waterplane(1, "Waterplane", (side*2), (side*2), 0.0)
-    
-    #example trees
-    for i in range(20):
-        x = random.randint(0, width*world.cPatchSize)
-        y = random.randint(0, height*world.cPatchSize)
-        z = terrain.getHeight(x,y)
-        x = x - width*world.cPatchSize/2
-        y = y - height*world.cPatchSize/2
-        if (z > 2.0) and (z < terrain.getMaxitem()/2.0):
-            world.createEntity_Staticmesh(1, "Tree"+str(world.TXML.getCurrentEntityID()),
-                                          mesh="plane.mesh",
-                                          material="",
-                                          transform="%f,%f,%f,0,0,0,1,1,1" % (y, z+6, x))
-    
     w.TXML.endScene()
     w.toFile("./Terrain.txml", overwrite=True)
-
+    
 create_assets()
 create_world()
