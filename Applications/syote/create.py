@@ -24,6 +24,7 @@ def create_assets():
     os.mkdir(folder)
     global patchSize
     global patchCount
+    global asd
     
     for i in terrainSlice:
         inputFile = i + terrainSuffix
@@ -35,6 +36,7 @@ def create_assets():
         
         patchCount = t.width
         patchSize = t.cPatchSize
+        asd = t
         
         print "Generating weightmap for the terrain: " + i
         weightFile = folder + i + "weight.png"
@@ -91,34 +93,31 @@ def create_world():
                              avatar_prefix+"exampleavataraddon.js")
     w.createEntity_Waterplane(1, "Waterplane", (side*2), (side*2), 0.0)
     
-    addStuff()
+    addStuff(w)
     
     w.TXML.endScene()
     w.toFile("./Terrain.txml", overwrite=True)
 
-def addStuff():
+def addStuff(w):
     
     #example trees
     import random
     width = 32
     height = 32
     
-    w = WorldGenerator.WorldGenerator()
-    t = TerrainGenerator.TerrainGenerator()
     
-    
-    for i in range(20):
+    for i in range(100):
         x = random.randint(0, width*w.cPatchSize)
         y = random.randint(0, height*w.cPatchSize)
-        z = t.getHeight(x,y)
+        z = asd.getHeight(x,y)
         x = x - width*w.cPatchSize/2
         y = y - height*w.cPatchSize/2
-        if (z > 2.0) and (z < t.getMaxitem()/2.0):
+        if (z > 2.0) and (z < asd.getMaxitem()/2.0):
             w.createEntity_Staticmesh(1, "Tree"+str(w.TXML.getCurrentEntityID()),
                                           mesh="tree.mesh",
                                           material="",
                                           transform="%f,%f,%f,0,0,0,1,1,1" % (y, z+6, x))
 
 
-#create_assets()
+create_assets()
 create_world()
