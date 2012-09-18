@@ -24,7 +24,6 @@ def create_assets():
     os.mkdir(folder)
     global patchSize
     global patchCount
-    global asd
     
     for i in terrainSlice:
         inputFile = i + terrainSuffix
@@ -36,7 +35,6 @@ def create_assets():
         
         patchCount = t.width
         patchSize = t.cPatchSize
-        asd = t
         
         print "Generating weightmap for the terrain: " + i
         weightFile = folder + i + "weight.png"
@@ -93,30 +91,53 @@ def create_world():
                              avatar_prefix+"exampleavataraddon.js")
     w.createEntity_Waterplane(1, "Waterplane", (side*2), (side*2), 0.0)
     
-    addStuff(w)
+    addStuff(w, side)
     
     w.TXML.endScene()
     w.toFile("./Terrain.txml", overwrite=True)
 
-def addStuff(w):
-    
-    #example trees
+def addStuff(w, side):
+    print "Generating trees..."
+    #random example trees
     import random
-    width = 32
-    height = 32
+                
+    treeAmount = 50
+    treeAdjustment = 6 #acount for difference in the surface and models center
+    treeMinHeight = 5 # min height where trees can appear
+    treeMaxHeight = 40 # max, beyond this point htere will be no trees
     
-    
-    for i in range(100):
-        x = random.randint(0, width*w.cPatchSize)
-        y = random.randint(0, height*w.cPatchSize)
-        z = asd.getHeight(x,y)
-        x = x - width*w.cPatchSize/2
-        y = y - height*w.cPatchSize/2
-        if (z > 2.0) and (z < asd.getMaxitem()/2.0):
-            w.createEntity_Staticmesh(1, "Tree"+str(w.TXML.getCurrentEntityID()),
-                                          mesh="tree.mesh",
-                                          material="",
-                                          transform="%f,%f,%f,0,0,0,1,1,1" % (y, z+6, x))
+    for i, e in enumerate(terrainSlice):
+        #read height data from generated .ntf files
+        inputFile = folder + e + ".ntf"
+        t = TerrainGenerator.TerrainGenerator()
+        t.fromFile(inputFile)
+
+        for j in range(treeAmount):        
+            x = random.randint(0, side)
+            z = random.randint(0, side)
+            y = t.getHeight(z,x) # z,x like x,y with z being y, coord on its side
+            
+            #decide wether to create a tree here
+            if (y > treeMinHeight and y < treeMaxHeight) and (y < t.getMaxitem()):
+                
+                #placement correction, generated trees to their own slice
+                if i == 0:
+                    x = x
+                    z = z
+                if i == 1:
+                    x = x - side
+                    z = z
+                if i == 2:
+                    x = x - side
+                    z = z - side
+                if i == 3:
+                    x = x
+                    z = z - side
+                    
+                w.createEntity_Staticmesh(1, "Tree"+str(w.TXML.getCurrentEntityID()),
+                                              mesh="tree.mesh",
+                                              material="",
+                                              transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+treeAdjustment, z))
 
 
 create_assets()
