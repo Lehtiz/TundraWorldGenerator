@@ -29,7 +29,7 @@ def create_assets():
         inputFile = i + terrainSuffix
         t = TerrainGenerator.TerrainGenerator()
         t.fromFile(inputFile)
-        t.adjustHeight(-300.0)
+        t.adjustHeight(-200.0)
         outputFile = folder + i + ".ntf" 
         t.toFile(outputFile, overwrite=True)
         
@@ -63,9 +63,11 @@ def create_world():
     w = WorldGenerator.WorldGenerator()
     w.TXML.startScene()
     
+    overlapCorrection = 8
+    
     # position using x, z coordinates and the width of one slice
     #print(patchCount * patchSize)
-    side = patchCount * patchSize
+    side = patchCount * patchSize - overlapCorrection
     spot1 = "%f,0,%f,0,0,0,1,1,1" % (0, 0)
     spot2 = "%f,0,%f,0,0,0,1,1,1" % (-side, 0)
     spot3 = "%f,0,%f,0,0,0,1,1,1" % (-side, -side)
@@ -88,6 +90,20 @@ def create_world():
                              avatar_prefix+"simpleavatar.js;" + \
                              avatar_prefix+"exampleavataraddon.js")
     w.createEntity_Waterplane(1, "Waterplane", (side*2), (side*2), 0.0)
+    
+    #example trees
+    for i in range(20):
+        x = random.randint(0, width*world.cPatchSize)
+        y = random.randint(0, height*world.cPatchSize)
+        z = terrain.getHeight(x,y)
+        x = x - width*world.cPatchSize/2
+        y = y - height*world.cPatchSize/2
+        if (z > 2.0) and (z < terrain.getMaxitem()/2.0):
+            world.createEntity_Staticmesh(1, "Tree"+str(world.TXML.getCurrentEntityID()),
+                                          mesh="plane.mesh",
+                                          material="",
+                                          transform="%f,%f,%f,0,0,0,1,1,1" % (y, z+6, x))
+    
     w.TXML.endScene()
     w.toFile("./Terrain.txml", overwrite=True)
 

@@ -29,7 +29,7 @@ def create_assets():
         inputFile = i + terrainSuffix
         t = TerrainGenerator.TerrainGenerator()
         t.fromFile(inputFile)
-        t.adjustHeight(-300.0)
+        t.adjustHeight(-200.0)
         outputFile = folder + i + ".ntf" 
         t.toFile(outputFile, overwrite=True)
         
@@ -63,9 +63,11 @@ def create_world():
     w = WorldGenerator.WorldGenerator()
     w.TXML.startScene()
     
+    overlapCorrection = 8
+    
     # position using x, z coordinates and the width of one slice
     #print(patchCount * patchSize)
-    side = patchCount * patchSize
+    side = patchCount * patchSize - overlapCorrection
     spot1 = "%f,0,%f,0,0,0,1,1,1" % (0, 0)
     spot2 = "%f,0,%f,0,0,0,1,1,1" % (-side, 0)
     spot3 = "%f,0,%f,0,0,0,1,1,1" % (-side, -side)
