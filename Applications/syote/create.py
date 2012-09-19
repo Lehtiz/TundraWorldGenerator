@@ -65,13 +65,12 @@ def create_world():
     
     overlapCorrection = 8
     
-    # position using x, z coordinates and the width of one slice
-    #print(patchCount * patchSize)
-    side = patchCount * patchSize - overlapCorrection
+    # position using x, z coordinates and the width of one terrain tile
+    tileWidth = patchCount * patchSize - overlapCorrection
     spot1 = "%f,0,%f,0,0,0,1,1,1" % (0, 0)
-    spot2 = "%f,0,%f,0,0,0,1,1,1" % (-side, 0)
-    spot3 = "%f,0,%f,0,0,0,1,1,1" % (-side, -side)
-    spot4 = "%f,0,%f,0,0,0,1,1,1" % (0, -side)
+    spot2 = "%f,0,%f,0,0,0,1,1,1" % (-tileWidth, 0)
+    spot3 = "%f,0,%f,0,0,0,1,1,1" % (-tileWidth, -tileWidth)
+    spot4 = "%f,0,%f,0,0,0,1,1,1" % (0, -tileWidth)
     
     spot = spot1, spot2, spot3, spot4
     
@@ -89,55 +88,87 @@ def create_world():
                              avatar_prefix+"avatarapplication.js;"+ \
                              avatar_prefix+"simpleavatar.js;" + \
                              avatar_prefix+"exampleavataraddon.js")
-    w.createEntity_Waterplane(1, "Waterplane", (side*2), (side*2), 0.0)
+    w.createEntity_Waterplane(1, "Waterplane", (tileWidth*2), (tileWidth*2), 0.0)
     
-    addStuff(w, side)
+    addStuff(w, tileWidth)
     
     w.TXML.endScene()
     w.toFile("./Terrain.txml", overwrite=True)
 
-def addStuff(w, side):
+def addStuff(w, tileWidth):
     print "Generating trees..."
     #random example trees
     import random
-                
-    treeAmount = 50
-    treeAdjustment = 6 #acount for difference in the surface and models center
-    treeMinHeight = 5 # min height where trees can appear
-    treeMaxHeight = 40 # max, beyond this point htere will be no trees
     
     for i, e in enumerate(terrainSlice):
+        treeAmount = 50 # amount function tries to generate, atm per tile
+        treeAdjustment = 6 # acount for difference in the surface and models center
+        treeMinHeight = 5 # min height where trees can appear
+        treeMaxHeight = 40 # max, beyond this point there will be no trees
+        
         #read height data from generated .ntf files
         inputFile = folder + e + ".ntf"
         t = TerrainGenerator.TerrainGenerator()
         t.fromFile(inputFile)
 
-        for j in range(treeAmount):        
-            x = random.randint(0, side)
-            z = random.randint(0, side)
-            y = t.getHeight(z,x) # z,x like x,y with z being y, coord on its side
+        #for j in range(treeAmount):
+        loop = 0
+        maxLoop = 500
+        # try to generate the amount of trees specified above, stop after 500 tries to prevent infi loops
+        while treeAmount > 0 and loop < maxLoop:
+            loop = loop + 1
+            x = random.randint(0, tileWidth)
+            z = random.randint(0, tileWidth)
+            y = t.getHeight(z,x) # z,x like x,y with z being x, coord on its side
             
             #decide wether to create a tree here
             if (y > treeMinHeight and y < treeMaxHeight) and (y < t.getMaxitem()):
                 
-                #placement correction, generated trees to their own slice
-                if i == 0:
-                    x = x
-                    z = z
-                if i == 1:
-                    x = x - side
-                    z = z
-                if i == 2:
-                    x = x - side
-                    z = z - side
-                if i == 3:
-                    x = x
-                    z = z - side
-                    
-                w.createEntity_Staticmesh(1, "Tree"+str(w.TXML.getCurrentEntityID()),
-                                              mesh="tree.mesh",
-                                              material="",
-                                              transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+treeAdjustment, z))
+                #check vegetationmap here with the coordinates 
+                if checkVegMap(e,z,x): # tile, x-coord, y-coord
+                
+                    #placement correction, generated trees to their own slice
+                    if i == 0:
+                        x = x
+                        z = z
+                    if i == 1:
+                        x = x - tileWidth
+                        z = z
+                    if i == 2:
+                        x = x - tileWidth
+                        z = z - tileWidth
+                    if i == 3:
+                        x = x
+                        z = z - tileWidth
+                        
+                    w.createEntity_Staticmesh(1, "Tree"+str(w.TXML.getCurrentEntityID()),
+                                                  mesh="tree.mesh",
+                                                  material="",
+                                                  transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+treeAdjustment, z))
+                    treeAmount = treeAmount - 1 # tree added, reduce counter
+                                                  
+def checkVegMap(tile, x, y): # return true if allowed
+    from PIL import Image
+    #print "reading vegetation map: " + tile
+    im = Image.open(tile + "vegetationMap.png")
+    pix = im.load()
+    
+    pixel = pix[x,y] # returns tuple rgb
+    
+    #red do something
+    if pixel[0] == 255:
+        #print str(x) + "," + str(y) + " red"
+        return True
+        
+    #green do nothing
+    if pixel[1] == 255:
+        #print str(x) + "," + str(y) + " green"
+        return False
+        
+    #blue do something
+    if pixel[2] == 255:
+        #print str(x) + "," + str(y) + " blue"
+        return True
 
 
 create_assets()
