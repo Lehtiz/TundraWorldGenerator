@@ -125,32 +125,33 @@ def addStuff(w, tileWidth):
             if (y > treeMinHeight and y < treeMaxHeight) and (y < t.getMaxitem()):
                 
                 #check vegetationmap here with the coordinates 
-                if checkVegMap(e,z,x): # tile, x-coord, y-coord
+                # tile, x-coord, y-coord
+                if checkVegMap(e,z,x) == 1: # mode1 tree, red in vegmap
                 
-                    #placement correction, generated trees to their own slice
-                    if i == 0:
-                        x = x
-                        z = z
-                    if i == 1:
-                        x = x - tileWidth
-                        z = z
-                    if i == 2:
-                        x = x - tileWidth
-                        z = z - tileWidth
-                    if i == 3:
-                        x = x
-                        z = z - tileWidth
-                        
-                    w.createEntity_Staticmesh(1, "Tree"+str(w.TXML.getCurrentEntityID()),
+                    x, z = locationOffset(i, x, z, tileWidth)
+                    
+                    w.createEntity_Staticmesh(1, "redTree"+str(w.TXML.getCurrentEntityID()),
                                                   mesh="tree.mesh",
                                                   material="",
                                                   transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+treeAdjustment, z))
                     treeAmount = treeAmount - 1 # tree added, reduce counter
-                                                  
-def checkVegMap(tile, x, y): # return true if allowed
+                
+                elif checkVegMap(e,z,x) == 2: # mode2 tree, blue in vegmap
+                
+                    x, z = locationOffset(i, x, z, tileWidth)
+                    
+                    w.createEntity_Staticmesh(1, "blueTree"+str(w.TXML.getCurrentEntityID()),
+                                                  mesh="tree.mesh",
+                                                  material="",
+                                                  transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+treeAdjustment, z))
+                    treeAmount = treeAmount - 1 # tree added, reduce counter
+                
+                 
+def checkVegMap(tileName, x, y): # return true if allowed
     from PIL import Image
-    #print "reading vegetation map: " + tile
-    im = Image.open(tile + "vegetationMap.png")
+    #print "reading vegetation map: " + tileName
+    #im = Image.open(folder + tileName + "vegetationMap.png") #use this after dynamic veg maps available
+    im = Image.open(tileName + "vegetationMap.png")
     pix = im.load()
     
     pixel = pix[x,y] # returns tuple rgb
@@ -158,17 +159,33 @@ def checkVegMap(tile, x, y): # return true if allowed
     #red do something
     if pixel[0] == 255:
         #print str(x) + "," + str(y) + " red"
-        return True
+        return 1
         
     #green do nothing
-    if pixel[1] == 255:
+    elif pixel[1] == 255:
         #print str(x) + "," + str(y) + " green"
-        return False
+        return 0
         
     #blue do something
-    if pixel[2] == 255:
+    elif pixel[2] == 255:
         #print str(x) + "," + str(y) + " blue"
-        return True
+        return 2
+        
+def locationOffset(tile, x, z, tileWidth):
+#placement correction, generated trees to their own slice
+    if tile == 0:
+        x = x
+        z = z
+    elif tile == 1:
+        x = x - tileWidth
+        z = z
+    elif tile == 2:
+        x = x - tileWidth
+        z = z - tileWidth
+    elif tile == 3:
+        x = x
+        z = z - tileWidth    
+    return x, z
 
 
 create_assets()
