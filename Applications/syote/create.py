@@ -147,7 +147,7 @@ def addStuff(w, tileWidth):
                     treeAmount = treeAmount - 1 # tree added, reduce counter
                 
                  
-def checkVegMap(tileName, x, y): # return true if allowed
+def checkVegMap(tileName, x, y): # return mode
     from PIL import Image
     #print "reading vegetation map: " + tileName
     #im = Image.open(folder + tileName + "vegetationMap.png") #use this after dynamic veg maps available
