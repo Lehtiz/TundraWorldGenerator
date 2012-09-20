@@ -6,6 +6,7 @@ import TerrainGenerator
 import WorldGenerator
 import MaterialGenerator
 import TextureGenerator
+import TreeGenerator
 
 prefix         = ""
 avatar_prefix  = ""
@@ -29,7 +30,7 @@ def create_assets():
         inputFile = i + terrainSuffix
         t = TerrainGenerator.TerrainGenerator()
         t.fromFile(inputFile)
-        t.adjustHeight(-200.0)
+        t.adjustHeight(-300.0)
         outputFile = folder + i + ".ntf" 
         t.toFile(outputFile, overwrite=True)
         
@@ -67,11 +68,11 @@ def create_world():
     
     # position using x, z coordinates and the width of one slice
     #print(patchCount * patchSize)
-    side = patchCount * patchSize - overlapCorrection
+    tileWidth = patchCount * patchSize - overlapCorrection
     spot1 = "%f,0,%f,0,0,0,1,1,1" % (0, 0)
-    spot2 = "%f,0,%f,0,0,0,1,1,1" % (-side, 0)
-    spot3 = "%f,0,%f,0,0,0,1,1,1" % (-side, -side)
-    spot4 = "%f,0,%f,0,0,0,1,1,1" % (0, -side)
+    spot2 = "%f,0,%f,0,0,0,1,1,1" % (-tileWidth, 0)
+    spot3 = "%f,0,%f,0,0,0,1,1,1" % (-tileWidth, -tileWidth)
+    spot4 = "%f,0,%f,0,0,0,1,1,1" % (0, -tileWidth)
     
     spot = spot1, spot2, spot3, spot4
     
@@ -89,7 +90,12 @@ def create_world():
                              avatar_prefix+"avatarapplication.js;"+ \
                              avatar_prefix+"simpleavatar.js;" + \
                              avatar_prefix+"exampleavataraddon.js")
-    w.createEntity_Waterplane(1, "Waterplane", (side*2), (side*2), 0.0)
+    w.createEntity_Waterplane(1, "Waterplane", (tileWidth*2), (tileWidth*2), 0.0)
+    
+    # tree generation
+    tree = TreeGenerator.TreeGenerator()
+    tree.addStuff(folder, terrainSlice, w, tileWidth)
+    
     w.TXML.endScene()
     w.toFile("./Terrain.txml", overwrite=True)
 
