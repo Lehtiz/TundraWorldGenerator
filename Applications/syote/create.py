@@ -64,14 +64,22 @@ def create_world():
     w = WorldGenerator.WorldGenerator()
     w.TXML.startScene()
     
-    overlapCorrection = 8
+    # witdh of the overlap caused by replacing the missing 8 points in the maps
+    overlapCorrection = 8 
+    
+    #scaling 1:5 height width
+    verScale = 1
+    horScale = 5
     
     # position using x, z coordinates and the width of one terrain tile
     tileWidth = patchCount * patchSize - overlapCorrection
-    spot1 = "%f,0,%f,0,0,0,1,1,1" % (0, 0)
-    spot2 = "%f,0,%f,0,0,0,1,1,1" % (-tileWidth, 0)
-    spot3 = "%f,0,%f,0,0,0,1,1,1" % (-tileWidth, -tileWidth)
-    spot4 = "%f,0,%f,0,0,0,1,1,1" % (0, -tileWidth)
+    tileOffset = tileWidth * horScale
+    
+    #loc xyz, rot xyz, scale xyz 
+    spot1 = "%f,0,%f,0,0,0,%f,%f,%f" % (0, 0, horScale,verScale,horScale)
+    spot2 = "%f,0,%f,0,0,0,%f,%f,%f" % (-tileOffset, 0, horScale,verScale,horScale)
+    spot3 = "%f,0,%f,0,0,0,%f,%f,%f" % (-tileOffset, -tileOffset, horScale,verScale,horScale)
+    spot4 = "%f,0,%f,0,0,0,%f,%f,%f" % (0, -tileOffset, horScale,verScale,horScale)
     
     spot = spot1, spot2, spot3, spot4
     
@@ -93,7 +101,7 @@ def create_world():
     
     # tree generation
     tree = TreeGenerator.TreeGenerator()
-    tree.addStuff(folder, terrainSlice, w, tileWidth)
+    tree.addStuff(folder, terrainSlice, w, tileWidth, horScale)
     
     w.TXML.endScene()
     w.toFile("./Terrain.txml", overwrite=True)
