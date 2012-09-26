@@ -22,7 +22,6 @@ class TreeGenerator():
             t.fromFile(inputFile)
             
             treeAmount = 200 # amount of entities function tries to generate, atm per tile
-            treeAdjustment = 6 # acount for difference in the surface and models center
             treeMinHeight = 2 # min height where trees can appear
             treeMaxHeight = 80 # max, beyond this point there will be no trees
 
@@ -113,10 +112,3 @@ class TreeGenerator():
                                       mesh=mesh,
                                       material=material,
                                       transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+treeAdjustment, z))
-            
-        '''
-        w.createEntity_Staticmesh(1, "blueTree"+str(w.TXML.getCurrentEntityID()),
-                                      mesh="tree.mesh",
-                                      material="tree.material",
-                                      transform="%f,%f,%f,0,0,0,1,1,1" % (x, ytreeAdjustment, z))
-        '''
