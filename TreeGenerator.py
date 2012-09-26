@@ -33,8 +33,7 @@ class TreeGenerator():
                 if (y > treeMinHeight and y < treeMaxHeight) and (y < t.getMaxitem()):
                     
                     #check vegetationmap here with the coordinates 
-                    if self.checkVegMap(e,z,x) == 1: # mode1 tree, red in vegmap
-                    
+                    if self.checkVegMap(e,x,z) == 1: # mode1 tree, red in vegmap
                         #offset the entity coordinates to match the tile it should be on
                         x, z = self.locationOffset(i, x, z, tileWidth, horScale)
                         
@@ -50,7 +49,7 @@ class TreeGenerator():
                         '''
                         treeAmount = treeAmount - 1 # tree added, reduce counter
                     
-                    elif self.checkVegMap(e,z,x) == 2: # mode2 tree, blue in vegmap
+                    elif self.checkVegMap(e,x,z) == 2: # mode2 tree, blue in vegmap
                     
                         x, z = self.locationOffset(i, x, z, tileWidth, horScale)
                         '''
@@ -60,50 +59,51 @@ class TreeGenerator():
                                                       transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+treeAdjustment, z))
                         '''
                         w.createEntity_Staticmesh(1, "blueTree"+str(w.TXML.getCurrentEntityID()),
-                                                      mesh="Cube.mesh",
-                                                      material="Material.material",
+                                                      mesh="tree.mesh",
+                                                      material="tree.material",
                                                       transform="%f,%f,%f,0,0,0,1,1,1" % (x, y, z))
                         treeAmount = treeAmount - 1 # tree added, reduce counter
                     
                      
-    def checkVegMap(self, tileName, x, y): # return mode
+    def checkVegMap(self, tileName, x, z): # return mode
         from PIL import Image
         #print "reading vegetation map: " + tileName
         #im = Image.open(folder + tileName + "vegetationMap.png") #use this after dynamic veg maps available
         im = Image.open(tileName + "vegetationMap.png")
         pix = im.load()
         
-        pixel = pix[x,y] # returns tuple rgb
+        pixel = pix[x,z] # returns tuple rgb
         
         #red do something
         if pixel[0] == 255:
-            #print str(x) + "," + str(y) + " red"
+            #print str(x) + "," + str(z) + " red"
             return 1
             
         #green do nothing
         elif pixel[1] == 255:
-            #print str(x) + "," + str(y) + " green"
+            #print str(x) + "," + str(z) + " green"
             return 0
             
         #blue do something
         elif pixel[2] == 255:
-            #print str(x) + "," + str(y) + " blue"
+            #print str(x) + "," + str(z) + " blue"
             return 2
             
     def locationOffset(self, tile, x, z, tileWidth, horScale):
-    #placement correction, generated trees to their own slice
-        var = tileWidth * horScale
+        #placement correction, generated trees to their own slice
         if tile == 0:
-            x = x * horScale
-            z = z * horScale
+            x = x
+            z = z
         elif tile == 1:
-            x = x - var
-            z = z * horScale
+            x = x - tileWidth
+            z = z
         elif tile == 2:
-            x = x - var
-            z = z - var
+            x = x - tileWidth
+            z = z - tileWidth
         elif tile == 3:
-            x = x * horScale
-            z = z - var    
+            x = x
+            z = z - tileWidth
+        x = x * horScale
+        z = z * horScale 
         return x, z
-
+        

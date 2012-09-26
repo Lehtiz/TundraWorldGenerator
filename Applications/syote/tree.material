@@ -1,4 +1,4 @@
-material spruce
+material pine
 {
 	transparency_casts_shadows on
 
@@ -18,7 +18,7 @@ material spruce
                         // joka on sama kuin:
 			// scene_blend alpha_blend
 
-                        alpha_rejection greater_equal 160
+                        alpha_rejection greater_equal 130
 
 //			depth_write off
 			//ambient 1.0 1.0 1.0 1
@@ -28,8 +28,9 @@ material spruce
 			
 			texture_unit
 			{
-				texture sassafras_branch.png
+				texture pine.png
 				tex_address_mode clamp
+
 				//wave_xform rotate sine 1.0 0.2 0.9 0.02
 			}
 		}
@@ -40,14 +41,14 @@ material spruce
  			iteration once
 			lighting off
             scene_blend src_alpha one_minus_src_alpha
-            alpha_rejection less_equal 159
+            alpha_rejection less_equal 129
 			depth_write off
 			specular 0.801 0.801 0.801 68 0
 			
 			texture_unit
 			{
 				tex_address_mode clamp
-				texture sassafras_branch.png
+				texture pine.png
 			}
 		}
 
