@@ -100,8 +100,8 @@ def create_world():
     w.createEntity_Waterplane(1, "Waterplane", (tileWidth*2), (tileWidth*2), 0.0)
     
     # tree generation
-    tree = TreeGenerator.TreeGenerator()
-    tree.addStuff(folder, terrainSlice, w, tileWidth, horScale)
+    tree = TreeGenerator.TreeGenerator(folder, terrainSlice, tileWidth, horScale)
+    tree.addStuff(w)
     
     w.TXML.endScene()
     w.toFile("./Terrain.txml", overwrite=True)

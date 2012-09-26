@@ -4,13 +4,20 @@ import TerrainGenerator
 import random
 
 class TreeGenerator():
-    def addStuff(self, folder, terrainSlice, w, tileWidth, horScale):
+    
+    def __init__(self, folder, terrainSlice, tileWidth, horScale):
+        self.folder = folder
+        self.terrainSlice = terrainSlice
+        self.tileWidth = tileWidth
+        self.horScale = horScale
+        
+    def addStuff(self, w):
         print "Generating trees..."
         #random example trees
         
-        for i, e in enumerate(terrainSlice):
+        for i, e in enumerate(self.terrainSlice):
             #read height data from generated .ntf files
-            inputFile = folder + e + ".ntf"
+            inputFile = self.folder + e + ".ntf"
             t = TerrainGenerator.TerrainGenerator()
             t.fromFile(inputFile)
             
@@ -25,8 +32,8 @@ class TreeGenerator():
             # try to generate the amount of trees specified above, stop after 500 tries to prevent infi loops
             while treeAmount > 0 and loop < maxLoop:
                 loop = loop + 1
-                x = random.randint(0, tileWidth)
-                z = random.randint(0, tileWidth)
+                x = random.randint(0, self.tileWidth)
+                z = random.randint(0, self.tileWidth)
                 y = t.getHeight(z,x) # z,x like x,y with z being x, coord on its side
                 
                 #decide wether to create a tree here
@@ -34,35 +41,16 @@ class TreeGenerator():
                     
                     #check vegetationmap here with the coordinates 
                     if self.checkVegMap(e,x,z) == 1: # mode1 tree, red in vegmap
-                        #offset the entity coordinates to match the tile it should be on
-                        x, z = self.locationOffset(i, x, z, tileWidth, horScale)
-                        
-                        w.createEntity_Staticmesh(1, "redTree"+str(w.TXML.getCurrentEntityID()),
-                                                      mesh="tree_group08.mesh",
-                                                      material="pine.material;spruce.material",
-                                                      transform="%f,%f,%f,0,0,0,1,1,1" % (x, y, z))
-                        '''
-                        w.createEntity_Staticmesh(1, "redTree"+str(w.TXML.getCurrentEntityID()),
-                                                      mesh="Cube.mesh",
-                                                      material="Material.material",
-                                                      transform="%f,%f,%f,0,0,0,1,1,1" % (x, y, z))
-                        '''
-                        treeAmount = treeAmount - 1 # tree added, reduce counter
+                        #offset the entity coordinates to match the tile it should be on, adjust to scale
+                        x, z = self.locationOffset(i, x, z, self.tileWidth, self.horScale)
+                        #add tree entity
+                        self.addTree(w, "group", x, y, z)
+                        treeAmount = treeAmount - 1
                     
                     elif self.checkVegMap(e,x,z) == 2: # mode2 tree, blue in vegmap
-                    
-                        x, z = self.locationOffset(i, x, z, tileWidth, horScale)
-                        '''
-                        w.createEntity_Staticmesh(1, "blueTree"+str(w.TXML.getCurrentEntityID()),
-                                                      mesh="tree.mesh",
-                                                      material="birch3_branches.material;birch3_bark.material",
-                                                      transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+treeAdjustment, z))
-                        '''
-                        w.createEntity_Staticmesh(1, "blueTree"+str(w.TXML.getCurrentEntityID()),
-                                                      mesh="tree.mesh",
-                                                      material="tree.material",
-                                                      transform="%f,%f,%f,0,0,0,1,1,1" % (x, y, z))
-                        treeAmount = treeAmount - 1 # tree added, reduce counter
+                        x, z = self.locationOffset(i, x, z, self.tileWidth, self.horScale)
+                        self.addTree(w, "birch", x, y, z)
+                        treeAmount = treeAmount - 1
                     
                      
     def checkVegMap(self, tileName, x, z): # return mode
@@ -107,3 +95,28 @@ class TreeGenerator():
         z = z * horScale 
         return x, z
         
+    def addTree(self, w, type, x, y, z):
+        if (type == "birch"):
+            mesh="birch.mesh"
+            material="birch3_branches.material;birch3_bark.material"
+            treeAdjustment = 6
+        elif (type == "simple"):
+            mesh="tree.mesh"
+            material="pine.material;"
+            treeAdjustment = 0
+        elif (type == "group"):
+            mesh="tree_group08.mesh"
+            material="pine.material;spruce.material"
+            treeAdjustment = 0
+            
+        w.createEntity_Staticmesh(1, type + "Tree"+str(w.TXML.getCurrentEntityID()),
+                                      mesh=mesh,
+                                      material=material,
+                                      transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+treeAdjustment, z))
+            
+        '''
+        w.createEntity_Staticmesh(1, "blueTree"+str(w.TXML.getCurrentEntityID()),
+                                      mesh="tree.mesh",
+                                      material="tree.material",
+                                      transform="%f,%f,%f,0,0,0,1,1,1" % (x, ytreeAdjustment, z))
+        '''
