@@ -9,3 +9,4 @@ Applications/ruka/generated
 Applications/ruka/*.txml
 Applications/syote/generated
 Applications/syote/*.txml
+*/tmp/*
