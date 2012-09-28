@@ -1,0 +1,10 @@
+make (python test.py)
+->
+read /tmp/tree.mesh, print some stats, (dostuff), output to /tmp/1/tree.mesh.xml
+->
+convert tree.mesh.xml to mesh with OgreXMLConverter (drag&drop)
+->
+run test.txml scene
+
+
+(MeshIO lines commented out 376 & 379, fixed var on lines 332, 338 filename -> localfile)

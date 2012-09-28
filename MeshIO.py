@@ -329,13 +329,13 @@ class OgreXMLExport():
     def openOutputXML(self, localfile, overwrite):
         if os.path.exists(localfile):
             if overwrite == False:
-                print ("OgreXMLExport: ERROR: output file '%s' already exists!\n" % filename)
+                print ("OgreXMLExport: ERROR: output file '%s' already exists!\n" % localfile)
                 return
             else:
                 os.unlink(localfile)
         try: self.outputXMLFile = open(localfile, "w")
         except IOError:
-            print ("OgreXMLExport: ERROR: Unable to open file '%s' for writing!" % filename)
+            print ("OgreXMLExport: ERROR: Unable to open file '%s' for writing!" % localfile)
             self.outputXMLFile = None
 
     def closeOutputXML(self):
@@ -373,10 +373,12 @@ class OgreXMLExport():
         if normal == True:   s_out += "normals=\"true\" "
         if position == True: s_out += "positions=\"true\" "
         if texcoord0 == True:
-            s_out += "texture_coord_dimensions_0=\"float%d\" " % tex0_dimensions
+            # breaks mesh conversion
+            #s_out += "texture_coord_dimensions_0=\"float%d\" " % tex0_dimensions
             t_count += 1
         if texcoord1 == True:
-            s_out += "texture_coord_dimensions_1=\"float%d\" " % tex1_dimensions
+            # breaks mesh conversion
+            #s_out += "texture_coord_dimensions_1=\"float%d\" " % tex1_dimensions
             t_count += 1
         if t_count > 0:
             s_out += ("texture_coords=\"%d\" " % t_count)
