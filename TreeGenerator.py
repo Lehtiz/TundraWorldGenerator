@@ -55,20 +55,15 @@ class TreeGenerator():
                     #check vegetationmap here with the coordinates
                     if self.checkVegMap(tileName,x,z) == 1:
                         # check if areas(groupwidth) heighdiff => somevalue
-                        self.dynamicMesh(t, tile, tileName, z, x, j) # z,x ?
+                        self.dynamicMesh(t, tileName, z, x, j) # z,x ?
+                        # y = 0 because meshgen alings itself with 0 + height currently
                         self.addTree(w, tile, "dynamicMesh", x, 0, z, tileName+str(j))
                         entityCount = entityCount + 1
                         
                     elif self.checkVegMap(tileName,x,z) == 2:
                         self.addTree(w, tile, "single", z, y, x)
                         entityCount = entityCount + 1
-            '''            
-            self.dynamicMesh(t, tile, tileName, 1, 1, 1111111)
-            self.addTree(w, tile, "dynamicMesh", 1, t.getHeight(1,1), 1, tileName+str(1111111))
-            
-            self.dynamicMesh(t, tile, tileName, 300, 300, 1111111)
-            self.addTree(w, tile, "dynamicMesh", 300, t.getHeight(300,300), 300, tileName+str(1111111))
-            '''
+                        
             print "Added " + str(entityCount) + " entities to " + tileName
                      
     def checkVegMap(self, tileName, x, z): # return mode
@@ -139,7 +134,7 @@ class TreeGenerator():
                                       transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+modelAdjustment, z))
 
 
-    def dynamicMesh(self, t, tile, tileName, x, z, groupId):
+    def dynamicMesh(self, t, tileName, x, z, groupId):
         #square mesh
         groupWidth = 40
         
@@ -161,9 +156,9 @@ class TreeGenerator():
         
         #create mesh
         name = tileName + str(groupId)
-        self.createDynamicGroup(name, tile, coord, height, y)
+        self.createDynamicGroup(name, coord, height, y)
         
-    def createDynamicGroup(self, name, tile, coord, height, startingHeight):
+    def createDynamicGroup(self, name, coord, height, startingHeight):
         import MeshContainer
         import MeshIO
         
