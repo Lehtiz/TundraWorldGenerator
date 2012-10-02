@@ -38,10 +38,8 @@ class TreeGenerator():
                 z = random.randint(0, self.tileWidth)
                 y = t.getHeight(x,z)
                 
-                a = [x, z]
-                b = [y]
-                coord.append(a)
-                height.append(b)
+                coord.append([x, z])
+                height.append([y])
             
             # loop though list of coordinates
             for j, e in enumerate(coord):
@@ -141,23 +139,21 @@ class TreeGenerator():
         coord = []
         height = []
         
-        for i in range(groupWidth):
-            for j in range (groupWidth):
-                if random.randint(0, 10) < 1:
-                    _x = i
-                    _z = j
-                    #out of bounds when generating near edge
-                    try:
-                        y = t.getHeight(_x+x,_z+z)
-                        coord.append([_x, _z])
-                        height.append([y])
-                    except:
-                        pass
+        for j in range(40):
+            _x = random.randint(-groupWidth, groupWidth)
+            _z = random.randint(-groupWidth, groupWidth)
+            try:
+                y = t.getHeight(_x+x,_z+z)
+                #floating trees when out of tile - fix this
+                coord.append([_x, _z])
+                height.append([y])
+                except:
+                    pass
         
         #create mesh
         name = tileName + str(groupId)
         self.createDynamicGroup(name, coord, height, y)
-        
+    
     def createDynamicGroup(self, name, coord, height, startingHeight):
         import MeshContainer
         import MeshIO
