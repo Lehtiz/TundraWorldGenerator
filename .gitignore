@@ -10,3 +10,6 @@ Applications/ruka/*.txml
 Applications/syote/generated
 Applications/syote/*.txml
 Applications/*/tmp/*
+
+#log files
+*.log
