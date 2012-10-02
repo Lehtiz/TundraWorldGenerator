@@ -36,7 +36,7 @@ class TreeGenerator():
             for j in range(self.treeAmount):
                 x = random.randint(0, self.tileWidth)
                 z = random.randint(0, self.tileWidth)
-                y = t.getHeight(z,x)
+                y = t.getHeight(x,z)
                 
                 a = [x, z]
                 b = [y]
@@ -55,19 +55,21 @@ class TreeGenerator():
                     #check vegetationmap here with the coordinates
                     if self.checkVegMap(tileName,x,z) == 1:
                         # check if areas(groupwidth) heighdiff => somevalue
-                        self.addTree(w, tile, "simplegroup", x, y, z)
+                        self.dynamicMesh(t, tile, tileName, z, x, j) # z,x ?
+                        self.addTree(w, tile, "dynamicMesh", x, 0, z, tileName+str(j))
                         entityCount = entityCount + 1
                         
                     elif self.checkVegMap(tileName,x,z) == 2:
-                        self.addTree(w, tile, "birch", x, y, z)
+                        self.addTree(w, tile, "single", z, y, x)
                         entityCount = entityCount + 1
+            '''            
+            self.dynamicMesh(t, tile, tileName, 1, 1, 1111111)
+            self.addTree(w, tile, "dynamicMesh", 1, t.getHeight(1,1), 1, tileName+str(1111111))
             
+            self.dynamicMesh(t, tile, tileName, 300, 300, 1111111)
+            self.addTree(w, tile, "dynamicMesh", 300, t.getHeight(300,300), 300, tileName+str(1111111))
+            '''
             print "Added " + str(entityCount) + " entities to " + tileName
-            
-            #generates a mesh based on location and heightdata, still needs to be converted by hand
-            self.dynamicMesh(t, tile, tileName, w, 0, 0)
-        #tmp
-        #self.createStaticGroup()
                      
     def checkVegMap(self, tileName, x, z): # return mode
         from PIL import Image
@@ -111,74 +113,33 @@ class TreeGenerator():
         z = z * self.horScale 
         return x, z
         
-    def addTree(self, w, tile, type, x, y, z):
+    def addTree(self, w, tile, type, x, y, z, meshName=""):
         #offset the entity coordinates to match the tile it should be on, adjust to scale
         x, z = self.locationOffset(tile, x, z)
         
         if (type == "birch"):
-            mesh="birch.mesh"
-            material="birch3_branches.material;birch3_bark.material"
+            mesh = "birch.mesh"
+            material = "birch3_branches.material;birch3_bark.material"
             modelAdjustment = 6
-        elif (type == "simple"):
-            mesh="tree.mesh"
-            material="pine.material;"
+            
+        elif (type == "single"):
+            mesh = "tree.mesh"
+            material = "tree.material"
             modelAdjustment = 0
-        elif (type == "simplegroup"):
-            mesh="treegroup.mesh"
-            material="tree.material;"
-            modelAdjustment = 0
-        elif (type == "group"):
-            mesh="tree_group08.mesh"
-            material="pine.material;spruce.material"
-            modelAdjustment = 0
-        elif (type == "treeline"):
-            mesh="treeline.mesh"
-            material="treeline.material"
+
+        elif (type == "dynamicMesh"):
+            mesh = self.folder + meshName + "dynamicGroup.mesh"
+            material = "tree.material"
             modelAdjustment = 0
             
         #random rotation?
-        w.createEntity_Staticmesh(1, type + "Tree"+str(w.TXML.getCurrentEntityID()),
+        w.createEntity_Staticmesh(1, type + meshName + "_Tree"+str(w.TXML.getCurrentEntityID()),
                                       mesh=mesh,
                                       material=material,
                                       transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+modelAdjustment, z))
 
-    #tmp
-    def createStaticGroup(self):
-        import MeshContainer
-        import MeshIO
-        
-        input = "tree.mesh.xml"
-        output = "treegroup.mesh.xml"
-        groupWidth = 80
-        treeAmount = 100
-        #starting point, check width
-        
-        print "Creating a treegroup..."
-        
-        mesh = MeshContainer.MeshContainer()
-        meshio = MeshIO.MeshIO(mesh)
-        #get base mesh from file, also adds a tree at 0,0
-        meshio.fromFile(input, None)
-        
-        #dostuff
-        for i in range(treeAmount):
-            mesh2 = MeshContainer.MeshContainer()
-            meshio2 = MeshIO.MeshIO(mesh2)
-            
-            meshio2.fromFile(input, None)
-            _x = random.randint(0, groupWidth)
-            _z = random.randint(0, groupWidth)
-            mesh2.translate(_x, 0, _z) # move inside mesh
-            #mesh.rotate(0,0,0,0) # rotate
-            #mesh.scale(2,2,2) # scale
 
-            #add last object to the meshcontainer
-            mesh.merge(mesh2, append=False) #append false; dont create new submesh
-        
-        #output
-        meshio.toFile(output, overwrite=True)
-
-    def dynamicMesh(self, t, tile, tileName, w, x, z):
+    def dynamicMesh(self, t, tile, tileName, x, z, groupId):
         #square mesh
         groupWidth = 40
         
@@ -190,27 +151,24 @@ class TreeGenerator():
                 if random.randint(0, 10) < 1:
                     _x = i
                     _z = j
-                    y = t.getHeight(_z,_x) #z,x - x,z ?teh fak
-                    coord.append([_x, _z])
-                    height.append([y])
+                    #out of bounds when generating near edge
+                    try:
+                        y = t.getHeight(_x+x,_z+z)
+                        coord.append([_x, _z])
+                        height.append([y])
+                    except:
+                        pass
         
         #create mesh
-        name = tileName
-        self.createDynamicGroup(name, tile, coord, height)
+        name = tileName + str(groupId)
+        self.createDynamicGroup(name, tile, coord, height, y)
         
-        #move mesh to the correct tile
-        x, z = self. locationOffset(tile, x, z)
-        w.createEntity_Staticmesh(1, name+"square"+str(w.TXML.getCurrentEntityID()),
-                                      mesh=name + "square.mesh",
-                                      material="tree.material",
-                                      transform="%f,%f,%f,0,0,0,1,1,1" % (x, 0, z))
-        
-    def createDynamicGroup(self, name, tile, coord, height):
+    def createDynamicGroup(self, name, tile, coord, height, startingHeight):
         import MeshContainer
         import MeshIO
         
         input = "tree.mesh.xml"
-        output = name + "square.mesh.xml"
+        output = self.folder + name + "dynamicGroup.mesh.xml"
         
         mesh = MeshContainer.MeshContainer()
         meshio = MeshIO.MeshIO(mesh)
@@ -223,15 +181,24 @@ class TreeGenerator():
             meshio2 = MeshIO.MeshIO(mesh2)
             
             meshio2.fromFile(input, None)
-            x = coord[i][0]
-            z = coord[i][1]
+            x = coord[i][0] * self.horScale
+            z = coord[i][1] * self.horScale
             y = height[i][0]
-            mesh2.translate(x * self.horScale, y, z * self.horScale) # move inside mesh
+            mesh2.translate(z, y, x) # no output on x,z
             #mesh.rotate(0,0,0,0) # rotate
             #mesh.scale(2,2,2) # scale
 
             #add last object to the meshcontainer
-            mesh.merge(mesh2, append=False) #append false; dont create new submesh
+            mesh.merge(mesh2, append=False) #append True, gray crossboxes
         
         #output
         meshio.toFile(output, overwrite=True)
+        
+        self.compileDynamicGroup(output)
+        
+    def compileDynamicGroup(self, input):
+        import subprocess
+        folder = "./../"
+        compiler = folder + "OgreXMLConverter.exe  -q"
+        
+        subprocess.Popen(compiler + " " +  input, shell=True)
