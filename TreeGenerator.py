@@ -147,8 +147,8 @@ class TreeGenerator():
                 #floating trees when out of tile - fix this
                 coord.append([_x, _z])
                 height.append([y])
-                except:
-                    pass
+            except:
+                pass
         
         #create mesh
         name = tileName + str(groupId)
