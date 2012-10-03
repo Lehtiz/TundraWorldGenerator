@@ -70,27 +70,27 @@ class TreeGenerator():
                      
     def checkVegMap(self, tileName, x, y): # return mode
         from PIL import Image
-        print "=====reading vegetation map: " + tileName
+        #print "=====reading vegetation map: " + tileName
         im = Image.open(self.inputFolder + tileName + "vegetationMap.png")
         pix = im.load()
         pixel = pix[x,y] # returns tuple rgb
         
         #red do something
         if pixel[0] == 255:
-            print str(x) + "," + str(y) + " red"
+            #print str(x) + "," + str(y) + " red"
             return 1
             
         #green do nothing
         elif pixel[1] == 255:
-            print str(x) + "," + str(y) + " green"
+            #print str(x) + "," + str(y) + " green"
             return 0
             
         #blue do something
         elif pixel[2] == 255:
-            print str(x) + "," + str(y) + " blue"
+            #print str(x) + "," + str(y) + " blue"
             return 2
         else:
-            print str(x) + "," + str(y) + " something else"
+            print str(x) + "," + str(y) + " something else:" + str(pixel) 
         
     def locationOffset(self, tile, x, y):
         #placement correction, generated trees to their own slice
