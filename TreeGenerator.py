@@ -155,9 +155,9 @@ class TreeGenerator():
         
         #create mesh
         name = tileName + str(groupId)
-        self.createDynamicGroup(name, coord, height, y)
+        self.createDynamicGroup(name, coord, height)
     
-    def createDynamicGroup(self, name, coord, height, startingHeight):
+    def createDynamicGroup(self, name, coord, height):
         import MeshContainer
         import MeshIO
         
