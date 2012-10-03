@@ -54,8 +54,9 @@ class TreeGenerator():
                 if (y > self.treeMinHeight and y < self.treeMaxHeight) and (y < t.getMaxitem()):
                 
                     #check vegetationmap here with the coordinates
+                    # coordinates flipped from 3d to 2d x,y,z -> z,x
                     if self.checkVegMap(tileName,x,z) == 1:
-                        self.dynamicMesh(t, tileName, z, x, j) # z,x ?
+                        self.dynamicMesh(t, tileName, z, x, j)
                         # y = 0 because meshgen alings itself with 0 + height currently
                         self.addTree(w, tile, "dynamicMesh", x, 0, z, tileName+str(j))
                         entityCount = entityCount + 1
