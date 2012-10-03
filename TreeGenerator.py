@@ -5,24 +5,28 @@ import random
 
 class TreeGenerator():
     
-    def __init__(self, outputFolder, inputFolder, terrainSlice, tileWidth, horScale):
+    def __init__(self, outputFolder, inputFolder, terrainSlice, tileWidth, horScale, 
+                    treeAmount=300, treeMinHeight=2, treeMaxHeight=800):
+        
         self.outputFolder = outputFolder
         self.inputFolder = inputFolder
+        
+        # string tuple containing the names of the tiles
         self.terrainSlice = terrainSlice
+        # int containing the width and lenght of a tile
         self.tileWidth = tileWidth
+        # horisontal scaling factor
         self.horScale = horScale
         
         # amount of entities function tries to generate per tile - conditions
-        self.treeAmount = 300
+        self.treeAmount = treeAmount
         # min height where trees can appear
-        self.treeMinHeight = 2
+        self.treeMinHeight = treeMinHeight
         # max, beyond this point there will be no trees
-        self.treeMaxHeight = 80  
+        self.treeMaxHeight = treeMaxHeight
         
     def addStuff(self, w):
-    
         print "Generating trees..."
-        #random example trees
         
         for tile, tileName in enumerate(self.terrainSlice):
             entityCount = 0
@@ -32,34 +36,31 @@ class TreeGenerator():
             t.fromFile(inputFile)
                         
             coord = []
-            height = []
             #generate random coordinates to array, get height
             for j in range(self.treeAmount):
                 x = random.randint(0, self.tileWidth)
                 z = random.randint(0, self.tileWidth)
                 y = t.getHeight(x,z)
                 
-                coord.append([x, z])
-                height.append([y])
+                coord.append([x, y, z])
             
             # loop though list of coordinates
             for j, e in enumerate(coord):
                 x = coord[j][0]
-                z = coord[j][1]
-                y = height[j][0]
+                y = coord[j][1]
+                z = coord[j][2]
                 
                 #tree adding logic
                 if (y > self.treeMinHeight and y < self.treeMaxHeight) and (y < t.getMaxitem()):
                 
                     #check vegetationmap here with the coordinates
                     if self.checkVegMap(tileName,x,z) == 1:
-                        # check if areas(groupwidth) heighdiff => somevalue
                         self.dynamicMesh(t, tileName, z, x, j) # z,x ?
                         # y = 0 because meshgen alings itself with 0 + height currently
                         self.addTree(w, tile, "dynamicMesh", x, 0, z, tileName+str(j))
                         entityCount = entityCount + 1
                         
-                    elif self.checkVegMap(tileName,x,z) == 2:
+                    elif self.checkVegMap(tileName,z,x) == 2:
                         self.addTree(w, tile, "single", z, y, x)
                         entityCount = entityCount + 1
                         
@@ -133,11 +134,10 @@ class TreeGenerator():
 
     def dynamicMesh(self, t, tileName, x, z, groupId):
         #square mesh
-        groupWidth = 80
-        entityAmount = 40
+        groupWidth = 100
+        entityAmount = 60
         
         coord = []
-        height = []
         print(tileName + str(groupId))
         for j in range(entityAmount):
             _x = random.randint(-groupWidth/2, groupWidth/2)
@@ -149,14 +149,13 @@ class TreeGenerator():
             if ( 0 <= adjustedX <= self.tileWidth and 0 <= adjustedZ <= self.tileWidth):
                 y = t.getHeight(adjustedX,adjustedZ)
                 #add to coord to be generated later
-                coord.append([_x, _z])
-                height.append([y])
+                coord.append([_x, y, _z])
         
         #create mesh
         name = tileName + str(groupId)
-        self.createDynamicGroup(name, coord, height)
+        self.createDynamicGroup(name, coord)
     
-    def createDynamicGroup(self, name, coord, height):
+    def createDynamicGroup(self, name, coord):
         import MeshContainer
         import MeshIO
         
@@ -175,8 +174,8 @@ class TreeGenerator():
             
             meshio2.fromFile(input, None)
             x = coord[i][0] * self.horScale
-            z = coord[i][1] * self.horScale
-            y = height[i][0]
+            y = coord[i][1]
+            z = coord[i][2] * self.horScale
             mesh2.translate(z, y, x) # no output on x,z
             #mesh.rotate(0,0,0,0) # rotate
             #mesh.scale(2,2,2) # scale
