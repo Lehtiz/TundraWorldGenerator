@@ -5,8 +5,9 @@ import random
 
 class TreeGenerator():
     
-    def __init__(self, folder, terrainSlice, tileWidth, horScale):
-        self.folder = folder
+    def __init__(self, outputFolder, inputFolder, terrainSlice, tileWidth, horScale):
+        self.outputFolder = outputFolder
+        self.inputFolder = inputFolder
         self.terrainSlice = terrainSlice
         self.tileWidth = tileWidth
         self.horScale = horScale
@@ -26,7 +27,7 @@ class TreeGenerator():
         for tile, tileName in enumerate(self.terrainSlice):
             entityCount = 0
             #read height data from generated .ntf files
-            inputFile = self.folder + tileName + ".ntf"
+            inputFile = self.outputFolder + tileName + ".ntf"
             t = TerrainGenerator.TerrainGenerator()
             t.fromFile(inputFile)
                         
@@ -67,8 +68,8 @@ class TreeGenerator():
     def checkVegMap(self, tileName, x, z): # return mode
         from PIL import Image
         #print "reading vegetation map: " + tileName
-        #im = Image.open(folder + tileName + "vegetationMap.png") #use this after dynamic veg maps available
-        im = Image.open(tileName + "vegetationMap.png")
+        im = Image.open(self.inputFolder + tileName + "vegetationMap.png") #use this after dynamic veg maps available
+        #im = Image.open(tileName + "vegetationMap.png")
         pix = im.load()
         
         pixel = pix[x,z] # returns tuple rgb
@@ -121,7 +122,7 @@ class TreeGenerator():
             modelAdjustment = 0
 
         elif (type == "dynamicMesh"):
-            mesh = self.folder + meshName + "dynamicGroup.mesh"
+            mesh = self.outputFolder + meshName + "dynamicGroup.mesh"
             material = "tree.material"
             modelAdjustment = 0
             
@@ -160,8 +161,8 @@ class TreeGenerator():
         import MeshContainer
         import MeshIO
         
-        input = "tree.mesh.xml"
-        output = self.folder + name + "dynamicGroup.mesh.xml"
+        input = self.inputFolder + "tree.mesh.xml"
+        output = self.outputFolder + name + "dynamicGroup.mesh.xml"
         
         mesh = MeshContainer.MeshContainer()
         meshio = MeshIO.MeshIO(mesh)
