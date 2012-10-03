@@ -68,10 +68,8 @@ class TreeGenerator():
     def checkVegMap(self, tileName, x, z): # return mode
         from PIL import Image
         #print "reading vegetation map: " + tileName
-        im = Image.open(self.inputFolder + tileName + "vegetationMap.png") #use this after dynamic veg maps available
-        #im = Image.open(tileName + "vegetationMap.png")
+        im = Image.open(self.inputFolder + tileName + "vegetationMap.png")
         pix = im.load()
-        
         pixel = pix[x,z] # returns tuple rgb
         
         #red do something
@@ -135,14 +133,15 @@ class TreeGenerator():
 
     def dynamicMesh(self, t, tileName, x, z, groupId):
         #square mesh
-        groupWidth = 40
+        groupWidth = 80
+        entityAmount = 40
         
         coord = []
         height = []
         print(tileName + str(groupId))
-        for j in range(40):
-            _x = random.randint(-groupWidth, groupWidth)
-            _z = random.randint(-groupWidth, groupWidth)
+        for j in range(entityAmount):
+            _x = random.randint(-groupWidth/2, groupWidth/2)
+            _z = random.randint(-groupWidth/2, groupWidth/2)
             adjustedX = _x+x
             adjustedZ = _z+z
             
