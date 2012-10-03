@@ -138,17 +138,19 @@ class TreeGenerator():
         
         coord = []
         height = []
-        
+        print(tileName + str(groupId))
         for j in range(40):
             _x = random.randint(-groupWidth, groupWidth)
             _z = random.randint(-groupWidth, groupWidth)
-            try:
-                y = t.getHeight(_x+x,_z+z)
-                #floating trees when out of tile - fix this
+            adjustedX = _x+x
+            adjustedZ = _z+z
+            
+            #make sure created object fits inside a tiles parameters, (otherwise we'll have floating trees)
+            if ( 0 <= adjustedX <= self.tileWidth and 0 <= adjustedZ <= self.tileWidth):
+                y = t.getHeight(adjustedX,adjustedZ)
+                #add to coord to be generated later
                 coord.append([_x, _z])
                 height.append([y])
-            except:
-                pass
         
         #create mesh
         name = tileName + str(groupId)
