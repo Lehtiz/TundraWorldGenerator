@@ -5,7 +5,7 @@
 
 var avatar_area_size = 10;
 var avatar_area_x = 0;
-var avatar_area_y = 5;
+var avatar_area_y = 30;
 var avatar_area_z = 0;
 
 if (!server.IsRunning()) {
