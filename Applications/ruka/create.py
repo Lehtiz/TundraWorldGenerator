@@ -94,9 +94,9 @@ def create_world():
                                           env_prefix+"rex_sky_left.dds;" + env_prefix+"rex_sky_right.dds;" + \
                                           env_prefix+"rex_sky_top.dds;" + env_prefix+"rex_sky_bottom.dds")
     w.createEntity_Avatar(1, "AvatarApp",
-                             resourcesFolder+"avatarapplication.js;"+ \
-                             resourcesFolder+"simpleavatar.js;" + \
-                             resourcesFolder+"exampleavataraddon.js")
+                             "avatarapplication.js;"+ \
+                             "simpleavatar.js;" + \
+                             "exampleavataraddon.js")
     w.createEntity_Waterplane(1, "Waterplane", (tileWidth*2), (tileWidth*2), 0.0)
     
     # tree generation
