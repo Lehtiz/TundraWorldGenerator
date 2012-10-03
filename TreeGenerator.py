@@ -52,64 +52,67 @@ class TreeGenerator():
                 
                 #tree adding logic
                 if (y > self.treeMinHeight and y < self.treeMaxHeight) and (y < t.getMaxitem()):
-                
                     #check vegetationmap here with the coordinates
+                    mode = self.checkVegMap(tileName, z, x)
+                    
                     # coordinates flipped from 3d to 2d x,y,z -> z,x
-                    if self.checkVegMap(tileName,x,z) == 1:
-                        self.dynamicMesh(t, tileName, z, x, j)
+                    if mode == 1:
+                        self.dynamicMesh(t, tileName, x, z, j)
                         # y = 0 because meshgen alings itself with 0 + height currently
                         self.addTree(w, tile, "dynamicMesh", x, 0, z, tileName+str(j))
                         entityCount = entityCount + 1
                         
-                    elif self.checkVegMap(tileName,z,x) == 2:
-                        self.addTree(w, tile, "single", z, y, x)
+                    elif mode == 2:
+                        self.addTree(w, tile, "single", x, y, z)
                         entityCount = entityCount + 1
                         
             print "Added " + str(entityCount) + " entities to " + tileName
                      
-    def checkVegMap(self, tileName, x, z): # return mode
+    def checkVegMap(self, tileName, x, y): # return mode
         from PIL import Image
-        #print "reading vegetation map: " + tileName
+        print "=====reading vegetation map: " + tileName
         im = Image.open(self.inputFolder + tileName + "vegetationMap.png")
         pix = im.load()
-        pixel = pix[x,z] # returns tuple rgb
+        pixel = pix[x,y] # returns tuple rgb
         
         #red do something
         if pixel[0] == 255:
-            #print str(x) + "," + str(z) + " red"
+            print str(x) + "," + str(y) + " red"
             return 1
             
         #green do nothing
         elif pixel[1] == 255:
-            #print str(x) + "," + str(z) + " green"
+            print str(x) + "," + str(y) + " green"
             return 0
             
         #blue do something
         elif pixel[2] == 255:
-            #print str(x) + "," + str(z) + " blue"
+            print str(x) + "," + str(y) + " blue"
             return 2
+        else:
+            print str(x) + "," + str(y) + " something else"
         
-    def locationOffset(self, tile, x, z):
+    def locationOffset(self, tile, x, y):
         #placement correction, generated trees to their own slice
         if tile == 0:
             x = x
-            z = z
+            y = y
         elif tile == 1:
-            x = x - self.tileWidth
-            z = z
+            x = x
+            y = y - self.tileWidth
         elif tile == 2:
             x = x - self.tileWidth
-            z = z - self.tileWidth
+            y = y - self.tileWidth
         elif tile == 3:
-            x = x
-            z = z - self.tileWidth
+            x = x - self.tileWidth
+            y = y
         x = x * self.horScale
-        z = z * self.horScale 
-        return x, z
+        y = y * self.horScale 
+        return x, y
         
     def addTree(self, w, tile, type, x, y, z, meshName=""):
         #offset the entity coordinates to match the tile it should be on, adjust to scale
-        x, z = self.locationOffset(tile, x, z)
+        z, x = self.locationOffset(tile, x, z)
         
         if (type == "birch"):
             mesh = "birch.mesh"
