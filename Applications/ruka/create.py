@@ -9,10 +9,10 @@ import TextureGenerator
 import TreeGenerator
 
 prefix         = ""
-avatar_prefix  = ""
 env_prefix     = ""
 
-folder = "./generated/"
+resourcesFolder  = "./resources/"
+generatedFolder = "./generated/"
 terrainSlice = "S5422B", "T5311A", "T5133G", "S5244H"
 terrainSuffix = ".xyz"
 
@@ -20,41 +20,41 @@ patchSize = 0
 patchCount = 0
 
 def create_assets():
-    if os.path.exists(folder):
-        shutil.rmtree(folder)
-    os.mkdir(folder)
+    if os.path.exists(generatedFolder):
+        shutil.rmtree(generatedFolder)
+    os.mkdir(generatedFolder)
     global patchSize
     global patchCount
     
     for i in terrainSlice:
-        inputFile = i + terrainSuffix
+        inputFile = resourcesFolder + i + terrainSuffix
         t = TerrainGenerator.TerrainGenerator()
         t.fromFile(inputFile)
         t.adjustHeight(-290.0)
-        outputFile = folder + i + ".ntf" 
+        outputFile = generatedFolder + i + ".ntf" 
         t.toFile(outputFile, overwrite=True)
         
         patchCount = t.width
         patchSize = t.cPatchSize
         
         print "Generating weightmap for the terrain: " + i
-        weightFile = folder + i + "weight.png"
+        weightFile = generatedFolder + i + "weight.png"
         t.toWeightmap(weightFile, fileformat="PNG", overwrite=True)
         
         print "Generating material for " + i
         m = MaterialGenerator.Material(i)
         m.createMaterial_4channelTerrain("terrain", "sand.png", "grass.png", "rock.png", "", weightFile)        
-        materialFile = folder + i + ".material"
+        materialFile = generatedFolder + i + ".material"
         m.toFile(materialFile, overwrite=True)
         
     print "Generating terrain textures"
     t = TextureGenerator.TextureGenerator()
     t.createSingleColorTexture(30,100,30,50)
-    t.toImage(folder + "grass.png", "PNG", overwrite=True)
+    t.toImage(generatedFolder + "grass.png", "PNG", overwrite=True)
     t.createSingleColorTexture(90,83,73,50)
-    t.toImage(folder + "rock.png", "PNG", overwrite=True)
+    t.toImage(generatedFolder + "rock.png", "PNG", overwrite=True)
     t.createSingleColorTexture(160,136,88,70)
-    t.toImage(folder + "sand.png", "PNG", overwrite=True)
+    t.toImage(generatedFolder + "sand.png", "PNG", overwrite=True)
         
     
 
@@ -94,13 +94,13 @@ def create_world():
                                           env_prefix+"rex_sky_left.dds;" + env_prefix+"rex_sky_right.dds;" + \
                                           env_prefix+"rex_sky_top.dds;" + env_prefix+"rex_sky_bottom.dds")
     w.createEntity_Avatar(1, "AvatarApp",
-                             avatar_prefix+"avatarapplication.js;"+ \
-                             avatar_prefix+"simpleavatar.js;" + \
-                             avatar_prefix+"exampleavataraddon.js")
+                             resourcesFolder+"avatarapplication.js;"+ \
+                             resourcesFolder+"simpleavatar.js;" + \
+                             resourcesFolder+"exampleavataraddon.js")
     w.createEntity_Waterplane(1, "Waterplane", (tileWidth*2), (tileWidth*2), 0.0)
     
     # tree generation
-    tree = TreeGenerator.TreeGenerator(folder, terrainSlice, tileWidth, horScale)
+    tree = TreeGenerator.TreeGenerator(generatedFolder, resourcesFolder, terrainSlice, tileWidth, horScale)
     tree.addStuff(w)
     
     w.TXML.endScene()

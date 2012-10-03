@@ -129,7 +129,7 @@ class TreeGenerator():
         #random rotation?
         w.createEntity_Staticmesh(1, type + meshName + "_Tree"+str(w.TXML.getCurrentEntityID()),
                                       mesh=mesh,
-                                      material=material,
+                                      material=self.inputFolder + material,
                                       transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+modelAdjustment, z))
 
 
