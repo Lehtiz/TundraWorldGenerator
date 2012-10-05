@@ -1,16 +1,16 @@
 #!/usr/bin/python
 ####
-# - trees could be grouped more like group groups in your groups so your groups can group
-# - 
-# - 
+# ? trees could be grouped more like group groups in your groups so your groups can group
+# ? read vegmap first, then draw coords and generate
+# 
 ####
 import WorldGenerator
 import TerrainGenerator
 import random
 
 class TreeGenerator():
-    def __init__(self, outputFolder, inputFolder, terrainSlice, tileWidth, horScale, 
-                    treeAmount=300, treeMinHeight=2, treeMaxHeight=800):
+    def __init__(self, outputFolder, inputFolder, terrainSlice, tileWidth, verScale, horScale, 
+                    treeAmount=300, treeMinHeight=2, treeMaxHeight=100):
         
         self.outputFolder = outputFolder
         self.inputFolder = inputFolder
@@ -19,7 +19,8 @@ class TreeGenerator():
         self.terrainSlice = terrainSlice
         # int containing the width and lenght of a tile
         self.tileWidth = tileWidth
-        # horisontal scaling factor
+        #scaling factors
+        self.verScale = verScale
         self.horScale = horScale
         
         # amount of entities function tries to generate per tile - conditions
@@ -63,7 +64,7 @@ class TreeGenerator():
             
             # coordinates flipped from 3d to 2d x,y,z -> z,x  
             y = t.getHeight(z,x)
-            coord.append([x, y, z])
+            coord.append([x, y*self.verScale, z])
             coord.sort()
             
             #exclude interest area from general coords
@@ -96,7 +97,7 @@ class TreeGenerator():
                 if(area==2):
                     # coordinates flipped from 3d to 2d x,y,z -> z,x
                     if mode == 1:
-                        self.dynamicMesh(t, tileName, x, z, j)
+                        self.createDynamicGroup(t, tileName, x, z, j)
                         # y = 0 because meshgen alings itself with 0 + height currently
                         self.addTree(w, tile, tileName, "dynamicMesh", x, 0, z, tileName + str(j))
                         entityCount = entityCount + 1
@@ -133,7 +134,6 @@ class TreeGenerator():
         
     def locationOffset(self, tile, x, y, mode = 0):
         #placement correction, generated trees to their own slice
-        
         if mode == 0:
             if tile == 0:
                 x = x
@@ -169,9 +169,11 @@ class TreeGenerator():
         #offset the entity coordinates to match the tile it should be on, adjust to scale
         x, z = self.locationOffset(tile, x, z)
         
+        #preconfigured entity types
         if (type == "birch"):
             mesh = "birch.mesh"
             material = "birch3_branches.material;birch3_bark.material"
+            #adjustment in y axel incase the model does not start at zero height
             modelAdjustment = 6
             
         elif (type == "single"):
@@ -191,10 +193,8 @@ class TreeGenerator():
                                       transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+modelAdjustment, z))
 
 
-    def dynamicMesh(self, t, tileName, x, z, groupId):
+    def createDynamicGroup(self, t, tileName, x, z, groupId, groupWidth = 100, entityAmount = 80):
         #square mesh
-        groupWidth = 100
-        entityAmount = 60
         
         coord = []
         print(tileName + str(groupId))
@@ -207,14 +207,19 @@ class TreeGenerator():
             #make sure created object fits inside a tiles parameters, (otherwise we'll have floating trees)
             if ( 0 <= adjustedX <= self.tileWidth and 0 <= adjustedZ <= self.tileWidth):
                 y = t.getHeight(adjustedZ,adjustedX)
-                #add to coord to be generated later
-                coord.append([_x, y, _z])
+                
+                #check list incase coords were generetted below the minimum height for trees
+                print str(y) + " " + str(self.treeMinHeight)
+                if y >= self.treeMinHeight:
+                    #add to coord to be generated later
+                    coord.append([_x, y*self.verScale, _z])
+                
         
         #create mesh
         name = tileName + str(groupId)
-        self.createDynamicGroup(name, coord)
+        self.createDynamicMesh(name, coord)
     
-    def createDynamicGroup(self, name, coord):
+    def createDynamicMesh(self, name, coord):
         import MeshContainer
         import MeshIO
         
@@ -235,6 +240,7 @@ class TreeGenerator():
             x = coord[i][0] * self.horScale
             y = coord[i][1]
             z = coord[i][2] * self.horScale
+            
             mesh2.translate(x, y, z) # no output on x,z
             #mesh.rotate(0,0,0,0) # rotate
             #mesh.scale(2,2,2) # scale
@@ -245,9 +251,9 @@ class TreeGenerator():
         #output
         meshio.toFile(output, overwrite=True)
         
-        self.compileDynamicGroup(output)
+        self.compileDynamicMesh(output)
         
-    def compileDynamicGroup(self, input):
+    def compileDynamicMesh(self, input):
         import subprocess
         folder = "./../"
         compiler = folder + "OgreXMLConverter.exe  -q"

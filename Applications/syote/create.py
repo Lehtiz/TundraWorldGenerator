@@ -67,9 +67,9 @@ def create_world():
     # witdh of the overlap caused by replacing the missing 8 points in the maps
     overlapCorrection = 8 
     
-    #scaling 1:5 height width
+    #scaling
     verScale = 1
-    horScale = 5
+    horScale = 8
     
     # position using x, z coordinates and the width of one terrain tile
     tileWidth = patchCount * patchSize - overlapCorrection
@@ -97,10 +97,10 @@ def create_world():
                              "avatarapplication.js;"+ \
                              "simpleavatar.js;" + \
                              "exampleavataraddon.js")
-    w.createEntity_Waterplane(1, "Waterplane", (tileWidth*2), (tileWidth*2), 0.0)
+    w.createEntity_Waterplane(1, "Waterplane", (tileWidth*2*horScale), (tileWidth*2*horScale), 0.0)
     
     # tree generation
-    tree = TreeGenerator.TreeGenerator(generatedFolder, resourcesFolder, terrainSlice, tileWidth, horScale)
+    tree = TreeGenerator.TreeGenerator(generatedFolder, resourcesFolder, terrainSlice, tileWidth, verScale, horScale)
     tree.addStuff(w)
     
     w.TXML.endScene()
