@@ -194,10 +194,8 @@ class TreeGenerator():
 
 
     def createDynamicGroup(self, t, tileName, x, z, groupId, groupWidth = 100, entityAmount = 80):
-        #square mesh
-        
         coord = []
-        print(tileName + str(groupId))
+        
         for j in range(entityAmount):
             _x = random.randint(-groupWidth/2, groupWidth/2)
             _z = random.randint(-groupWidth/2, groupWidth/2)
@@ -209,7 +207,6 @@ class TreeGenerator():
                 y = t.getHeight(adjustedZ,adjustedX)
                 
                 #check list incase coords were generetted below the minimum height for trees
-                print str(y) + " " + str(self.treeMinHeight)
                 if y >= self.treeMinHeight:
                     #add to coord to be generated later
                     coord.append([_x, y*self.verScale, _z])
