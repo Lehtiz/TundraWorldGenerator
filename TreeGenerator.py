@@ -10,7 +10,7 @@ import random
 
 class TreeGenerator():
     def __init__(self, outputFolder, inputFolder, terrainSlice, tileWidth, verScale, horScale, 
-                    treeAmount=300, treeMinHeight=2, treeMaxHeight=100):
+                    treeAmount=300, treeMinHeight=2, treeMaxHeight=200):
         
         self.outputFolder = outputFolder
         self.inputFolder = inputFolder
@@ -45,20 +45,22 @@ class TreeGenerator():
             t.fromFile(inputFile)
             
             #generate random coordinates to array, get height
-            coordInterest = self.generateCoord(t, tile, 30, pointOfInterestX, pointOfInterestZ, interestWidth, interestHeight)
+            #coordInterest = self.generateCoord(t, tile, 30, pointOfInterestX, pointOfInterestZ, interestWidth, interestHeight)
             #another set of coordinates for area beyond focus
-            coordGeneral = self.generateCoord(t, tile, 300, interestWidth, interestHeight, mode = 1)
+            #coordGeneral = self.generateCoord(t, tile, 300, interestWidth, interestHeight, mode = 1)
+            
+            coordGeneral = self.generateCoord(t, tile, 300)
             
             #add entities, 1 for interest area 2 for general
-            self.addEntity(1, t, w, coordInterest, tile, tileName)
-            self.addEntity(2, t, w, coordGeneral, tile, tileName)
+            #self.addEntity(1, t, w, coordInterest, tile, tileName)
+            self.addEntity(t, w, coordGeneral, tile, tileName, 2)
         
         
     def generateCoord(self, t, tile, amount, minX = 0, minZ = 0, xWidth = 600, zWidth = 600, mode = 0):
         coord = []
         for j in range(amount):
-            x = random.randint(0, xWidth)
-            z = random.randint(0, zWidth)
+            x = random.randint(0, xWidth) #+ random.random()
+            z = random.randint(0, zWidth) #+ random.random()
             #offset coordinates to tile vegmap, designated zone in a different location
             x, z = self.locationOffset(tile, x, z, 1)
             
@@ -75,7 +77,7 @@ class TreeGenerator():
         #print coord
         return coord
         
-    def addEntity(self, area, t, w, coord, tile, tileName):
+    def addEntity(self, t, w, coord, tile, tileName, area = 2):
         # loop though list of coordinates
         entityCount = 0
         for j, e in enumerate(coord):
@@ -86,22 +88,21 @@ class TreeGenerator():
             #tree adding logic
             if (y > self.treeMinHeight and y < self.treeMaxHeight):
                 #check vegetationmap here with the coordinates
-                mode = self.checkVegMap(tileName, x, z)
-                if(area==1):
-                    if mode == 1:
+                mode = self.checkVegMap(tileName, x, z) # tuple rgb+alpha "(0,0,0,255)"
+                if(area==1): # interest test
+                    if mode[0] == 255:
                         self.addTree(w, tile, tileName, "single", x, y, z)
                         entityCount = entityCount + 1
-                    if mode == 2:
+                    if mode[2] == 255:
                         self.addTree(w, tile, tileName, "single", x, y, z)
                         entityCount = entityCount + 1
-                if(area==2):
-                    # coordinates flipped from 3d to 2d x,y,z -> z,x
-                    if mode == 1:
-                        self.createDynamicGroup(t, tileName, x, z, j)
+                if(area==2): #default
+                    if mode[0] == 255:
+                        name = self.createDynamicGroup(t, tileName, x, z, j, 40, 150)
                         # y = 0 because meshgen alings itself with 0 + height currently
-                        self.addTree(w, tile, tileName, "dynamicMesh", x, 0, z, tileName + str(j))
+                        self.addTree(w, tile, tileName, "dynamicMesh", x, 0, z, name)
                         entityCount = entityCount + 1
-                    elif mode == 2:
+                    elif mode[2] == 255:
                         self.addTree(w, tile, tileName, "single", x, y, z)
                         entityCount = entityCount + 1
             
@@ -114,24 +115,8 @@ class TreeGenerator():
         im = Image.open(self.inputFolder + tileName + "vegetationMap.png")
         pix = im.load()
         pixel = pix[x,y] # returns tuple rgb
-        
-        #red do something
-        if pixel[0] == 255:
-            #print str(x) + "," + str(y) + " red"
-            return 1
-            
-        #green do nothing
-        elif pixel[1] == 255:
-            #print str(x) + "," + str(y) + " green"
-            return 0
-            
-        #blue do something
-        elif pixel[2] == 255:
-            #print str(x) + "," + str(y) + " blue"
-            return 2
-        else:
-            print str(x) + "," + str(y) + " something else:" + str(pixel) 
-        
+        return pixel    
+    
     def locationOffset(self, tile, x, y, mode = 0):
         #placement correction, generated trees to their own slice
         if mode == 0:
@@ -193,7 +178,7 @@ class TreeGenerator():
                                       transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+modelAdjustment, z))
 
 
-    def createDynamicGroup(self, t, tileName, x, z, groupId, groupWidth = 100, entityAmount = 80):
+    def createDynamicGroup(self, t, tileName, x, z, groupId, groupWidth = 50, entityAmount = 80):
         coord = []
         
         for j in range(entityAmount):
@@ -206,15 +191,19 @@ class TreeGenerator():
             if ( 0 <= adjustedX <= self.tileWidth and 0 <= adjustedZ <= self.tileWidth):
                 y = t.getHeight(adjustedZ,adjustedX)
                 
-                #check list incase coords were generetted below the minimum height for trees
-                if y >= self.treeMinHeight:
-                    #add to coord to be generated later
-                    coord.append([_x, y*self.verScale, _z])
+                # only add trees if over red in vegmap
+                pixel = self.checkVegMap(tileName, adjustedX, adjustedZ)
+                if  pixel[0] == 255:
+                    #check list incase coords were generetted below the minimum height for trees
+                    if y >= self.treeMinHeight:
+                        #add to coord to be generated later
+                        coord.append([_x, y*self.verScale, _z])
                 
         
         #create mesh
         name = tileName + str(groupId)
         self.createDynamicMesh(name, coord)
+        return name
     
     def createDynamicMesh(self, name, coord):
         import MeshContainer
@@ -252,7 +241,7 @@ class TreeGenerator():
         
     def compileDynamicMesh(self, input):
         import subprocess
-        folder = "./../"
-        compiler = folder + "OgreXMLConverter.exe  -q"
         
-        subprocess.Popen(compiler + " " +  input, shell=True)
+        compiler = "OgreXMLConverter.exe  -q "
+        
+        subprocess.Popen(compiler +  input, shell=True)
