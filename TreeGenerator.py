@@ -30,6 +30,10 @@ class TreeGenerator():
         # max, beyond this point there will be no trees
         self.treeMaxHeight = treeMaxHeight
         
+        self.groupWidth = 50
+        self.treesInGroup = 400
+        self.subSlice = tileWidth / self.groupWidth
+        
     def addStuff(self, w):
         print "Generating trees..."
         
@@ -49,14 +53,14 @@ class TreeGenerator():
             #another set of coordinates for area beyond focus
             #coordGeneral = self.generateCoord(t, tile, 300, interestWidth, interestHeight, mode = 1)
             
-            coordGeneral = self.generateCoord(t, tile, 300)
+            coordGeneral = self.generateCoordGrid(t, tile)
             
             #add entities, 1 for interest area 2 for general
             #self.addEntity(1, t, w, coordInterest, tile, tileName)
             self.addEntity(t, w, coordGeneral, tile, tileName, 2)
         
         
-    def generateCoord(self, t, tile, amount, minX = 0, minZ = 0, xWidth = 600, zWidth = 600, mode = 0):
+    def generateRandomCoord(self, t, tile, amount, minX = 0, minZ = 0, xWidth = 600, zWidth = 600, mode = 0):
         coord = []
         for j in range(amount):
             x = random.randint(0, xWidth) #+ random.random()
@@ -76,7 +80,34 @@ class TreeGenerator():
                         coord.pop(i)
         #print coord
         return coord
+    
+    #generate a grid of coordinates
+    def generateCoordGrid(self, t, tile):
+        coord = []
+        sliceWidth = self.tileWidth / self.subSlice
         
+        for i in range(self.subSlice): #x
+            for j in range(self.subSlice): #y
+                x = i * sliceWidth
+                z = j * sliceWidth 
+                #offset coordinates to tile vegmap, designated zone in a different location
+                x, z = self.locationOffset(tile, x, z, 1)
+                
+                # coordinates flipped from 3d to 2d x,y,z -> z,x  
+                y = t.getHeight(z,x)
+                coord.append([x, y*self.verScale, z])
+        
+        coord.sort()
+            
+        #exclude interest area from general coords
+        if 0 == 1:
+            for i, e in enumerate(coord):
+                if coord[i][0] < minX and coord[i][2] < minZ:
+                    coord.pop(i)
+        #print coord
+        return coord
+    
+    
     def addEntity(self, t, w, coord, tile, tileName, area = 2):
         # loop though list of coordinates
         entityCount = 0
@@ -98,7 +129,7 @@ class TreeGenerator():
                         entityCount = entityCount + 1
                 if(area==2): #default
                     if mode[0] == 255:
-                        name = self.createDynamicGroup(t, tileName, x, z, j, 30, 200)
+                        name = self.createDynamicGroup(t, tileName, x, z, j, self.groupWidth, self.treesInGroup)
                         # y = 0 because meshgen alings itself with 0 + height currently
                         self.addTree(w, tile, tileName, "dynamicMesh", x, 0, z, name)
                         entityCount = entityCount + 1
@@ -178,7 +209,7 @@ class TreeGenerator():
                                       transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+modelAdjustment, z))
 
 
-    def createDynamicGroup(self, t, tileName, x, z, groupId, groupWidth = 50, entityAmount = 80):
+    def createDynamicGroup(self, t, tileName, x, z, groupId, groupWidth, entityAmount):
         coord = []
         
         for j in range(entityAmount):
