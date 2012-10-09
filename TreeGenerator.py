@@ -98,7 +98,7 @@ class TreeGenerator():
                         entityCount = entityCount + 1
                 if(area==2): #default
                     if mode[0] == 255:
-                        name = self.createDynamicGroup(t, tileName, x, z, j, 40, 150)
+                        name = self.createDynamicGroup(t, tileName, x, z, j, 30, 200)
                         # y = 0 because meshgen alings itself with 0 + height currently
                         self.addTree(w, tile, tileName, "dynamicMesh", x, 0, z, name)
                         entityCount = entityCount + 1

@@ -69,7 +69,7 @@ def create_world():
     
     #scaling
     verScale = 1
-    horScale = 8
+    horScale = 10
     
     # position using x, z coordinates and the width of one terrain tile
     tileWidth = patchCount * patchSize - overlapCorrection
