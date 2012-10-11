@@ -137,16 +137,27 @@ class TreeGenerator():
                     
         print "Added " + str(entityCount) + " entities to " + tileName
     
-        
-    def checkVegMap(self, tileName, x, y): # return mode
-        start = datetime.datetime.now()
-        #print "=====reading vegetation map: " + tileName
+    #single pixel check    
+    def checkVegMap(self, tileName, x, y):
         im = Image.open(self.inputFolder + tileName + "vegetationMap.png")
         pix = im.load()
         pixel = pix[x,y] # returns tuple rgb
-        return pixel
+        return pixel 
+    
+    #vegmap to coord
+    def readVegMap(self, tileName):
+        coord = []
+        start = datetime.datetime.now()
+        im = Image.open(self.inputFolder + tileName + "vegetationMap.png")
+        pix = im.load()
+        for x in range(width):
+            for y in range(width):
+            pixel = pix[x,y]
+            coord.append(pixel)
         stop = datetime.datetime.now()
-        print "checkVegMap " + tileName +" "+ str(x) +"," + str(y) +" "+ " Runtime: " + str(stop - start) 
+        print "checkVegMap " + tileName +" "+ str(x) +"," + str(y) +" "+ " Runtime: " + str(stop - start)
+        return coord
+    
     
     def locationOffset(self, tile, x, y, mode = 0):
         #placement correction, generated trees to their own slice
