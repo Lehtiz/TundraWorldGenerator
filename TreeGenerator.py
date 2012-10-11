@@ -147,15 +147,15 @@ class TreeGenerator():
     #vegmap to coord
     def readVegMap(self, tileName):
         coord = []
-        start = datetime.datetime.now()
+        #start = datetime.datetime.now()
         im = Image.open(self.inputFolder + tileName + "vegetationMap.png")
         pix = im.load()
         for x in range(width):
             for y in range(width):
-            pixel = pix[x,y]
-            coord.append(pixel)
-        stop = datetime.datetime.now()
-        print "checkVegMap " + tileName +" "+ str(x) +"," + str(y) +" "+ " Runtime: " + str(stop - start)
+                pixel = pix[x,y]
+                coord.append(pixel)
+        #stop = datetime.datetime.now()
+        #print "checkVegMap " + tileName +" "+ str(x) +"," + str(y) +" "+ " Runtime: " + str(stop - start)
         return coord
     
     
@@ -225,6 +225,7 @@ class TreeGenerator():
         name = tileName + str(groupId)
         print "Generating treegroup: " + name
         coord = []
+        vegCoord = []
         
         for j in range(entityAmount):
             _x = random.randint(-groupWidth/2, groupWidth/2)
@@ -235,8 +236,9 @@ class TreeGenerator():
             #make sure created object fits inside a tiles parameters, (otherwise we'll have floating trees)
             if ( 0 <= adjustedX <= self.tileWidth and 0 <= adjustedZ <= self.tileWidth):
                 # only add trees if over red in vegmap
-                pixel = self.checkVegMap(tileName, adjustedX, adjustedZ)
-                if  pixel[0] == 255:
+                vegCoord = self.readVegMap()
+                #pixel = self.checkVegMap(tileName, adjustedX, adjustedZ)
+                if  vegCoord[j][0] == 255:
                     y = t.getHeight(adjustedZ,adjustedX)
                     #check list incase coords were generetted below the minimum height for trees
                     if y >= self.treeMinHeight:
