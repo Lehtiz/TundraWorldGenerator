@@ -39,7 +39,7 @@ def create_assets():
         
         print "Generating weightmap for the terrain: " + i
         weightFile = generatedFolder + i + "weight.png"
-        t.toWeightmap(weightFile, fileformat="PNG", overwrite=True, maxitem=90)
+        t.toWeightmap(weightFile, fileformat="PNG", overwrite=True, maxitem=200)
         
         print "Generating material for " + i
         m = MaterialGenerator.Material(i)
@@ -59,7 +59,6 @@ def create_assets():
     t.toImage(generatedFolder + "road.png", "PNG", overwrite=True)
         
     
-
 def create_world():
     t_width  = 16*((1500/16)+1)
     t_height = 16*((1500/16)+1)

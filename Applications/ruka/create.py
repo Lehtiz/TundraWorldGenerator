@@ -39,7 +39,7 @@ def create_assets():
         
         print "Generating weightmap for the terrain: " + i
         weightFile = generatedFolder + i + "weight.png"
-        t.toWeightmap(weightFile, fileformat="PNG", overwrite=True)
+        t.toWeightmap(weightFile, fileformat="PNG", overwrite=True, maxitem=200)
         
         print "Generating material for " + i
         m = MaterialGenerator.Material(i)
@@ -57,7 +57,6 @@ def create_assets():
     t.toImage(generatedFolder + "sand.png", "PNG", overwrite=True)
         
     
-
 def create_world():
     t_width  = 16*((1500/16)+1)
     t_height = 16*((1500/16)+1)
@@ -69,7 +68,7 @@ def create_world():
     
     #scaling
     verScale = 1
-    horScale = 8
+    horScale = 10
     
     # position using x, z coordinates and the width of one terrain tile
     tileWidth = patchCount * patchSize - overlapCorrection
@@ -100,7 +99,7 @@ def create_world():
     w.createEntity_Waterplane(1, "Waterplane", (tileWidth*2*horScale), (tileWidth*2*horScale), 0.0)
     
     # tree generation
-    tree = TreeGenerator.TreeGenerator(generatedFolder, resourcesFolder, terrainSlice, tileWidth, verScale, horScale)
+    tree = TreeGenerator.TreeGenerator(generatedFolder, resourcesFolder, terrainSlice, tileWidth, verScale, horScale, treeMinHeight=1)
     tree.addStuff(w)
     
     w.TXML.endScene()
