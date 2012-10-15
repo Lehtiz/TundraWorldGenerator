@@ -36,6 +36,7 @@ class TreeGenerator():
         # max, beyond this point there will be no trees
         self.treeMaxHeight = treeMaxHeight
         self.groupWidth = groupWidth
+        
         self.treesInGroup = treesInGroup
         
         #default values
@@ -46,7 +47,7 @@ class TreeGenerator():
         if groupWidth == None:
             self.groupWidth = 50
         if treesInGroup == None:
-            self.treesInGroup = 300
+            self.treesInGroup = 1000
         self.subSlice = tileWidth / self.groupWidth
     
     
@@ -96,14 +97,26 @@ class TreeGenerator():
     def vegMapToCoord(self, tileName):
         coord = []
         im = Image.open(self.inputFolder + tileName + "vegetationMap.png")
+        
+        if not 'transparency' in im.info:
+            im = im.convert('RGBA')
+        
         pix = im.load()
-        # +8 for overlap until fixed
-        for y in range(self.tileWidth+8):
-            for x in range(self.tileWidth+8):
+        
+        for y in range(im.size[1]):
+            for x in range(im.size[0]):
                 pixel = pix[x,y]
                 coord.append([[x,y],pixel])
         return coord
-    
+        
+    def getPixelOpacity(self, tileName, x, y):
+        im = Image.open(self.inputFolder + tileName + "vegetationMap.png")
+        if not 'transparency' in im.info:
+            im = im.convert('RGBA')
+        pix = im.load()
+        pixel = pix[x,y]
+        return pixel[3]
+        
     
     def addEntity(self, t, w, coord, tile, tileName, vegCoord):
         entityCount = 0
@@ -112,12 +125,12 @@ class TreeGenerator():
             y = coord[j][1]
             z = coord[j][2]
             
-            if (y > self.treeMinHeight and y < self.treeMaxHeight):
+            if (y >= self.treeMinHeight and y <= self.treeMaxHeight):
                 #creates forest like treegroup tiles, if group has more than 1 tree
-                name = self.createDynamicGroup(t, tileName, x, z, j, self.groupWidth, self.treesInGroup, vegCoord)
+                name = self.createDynamicGroup(t, tileName, x, z, j, vegCoord, self.treesInGroup)
                 
                 if name != "single": 
-                    # y = 0 because createdynmesh alings itself with 0 + height currently
+                    # y = 0 because createdynmesh aligns itself with 0 + height currently
                     self.addTree(w, tile, tileName, "dynamicMesh", x, 0, z, name)
                     entityCount = entityCount + 1
                     
@@ -190,14 +203,17 @@ class TreeGenerator():
                                       transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+modelAdjustment, z))
 
 
-    def createDynamicGroup(self, t, tileName, x, z, groupId, groupWidth, entityAmount, vegCoord):
+    def createDynamicGroup(self, t, tileName, x, z, groupId, vegCoord, entityAmount):
         name = tileName + str(groupId)
         print "Generating treegroup: " + name
         coord = []
         
-        for j in range(entityAmount):
-            _x = random.randint(-groupWidth/2, groupWidth/2)
-            _z = random.randint(-groupWidth/2, groupWidth/2)
+        pixel = self.getPixelOpacity(tileName,x,z)
+        amount = float(entityAmount) * (float(pixel) / float(255))
+        
+        for j in range(int(amount)):
+            _x = random.randint(-self.groupWidth/2, self.groupWidth/2)
+            _z = random.randint(-self.groupWidth/2, self.groupWidth/2)
             adjustedX = _x+x
             adjustedZ = _z+z
             
@@ -208,15 +224,18 @@ class TreeGenerator():
                 # figure out the index where we want to check for trees
                 i = adjustedX + adjustedZ * (self.tileWidth+8)
                 
-                # [index][x,y](R, G, B)
+                # [index][x,y](R, G, B, a)
                 if vegCoord[i][0] == [adjustedX, adjustedZ]:
-                    #if red
-                    if vegCoord[i][1][0] == 255:
-                        y = t.getHeight(adjustedZ,adjustedX)
-                        #check list incase coords were generated below the minimum height for trees
-                        if y >= self.treeMinHeight and y <= self.treeMaxHeight:
-                            #add to coord to be generated later
-                            coord.append([_x, y*self.verScale, _z])
+                    #do nothing while on green or when opacity is 0
+                    if not vegCoord[i][1][3] == 0:
+                        if not (vegCoord[i][1][0] == 0 and 
+                                vegCoord[i][1][1] == 255 and 
+                                vegCoord[i][1][2] == 0):
+                            y = t.getHeight(adjustedZ,adjustedX)
+                            #check list incase coords were generated below the minimum height for trees
+                            if y >= self.treeMinHeight and y <= self.treeMaxHeight:
+                                #add to coord to be generated later
+                                coord.append([[_x, y*self.verScale, _z], vegCoord[i][1]])
         
         if len(coord) > 1:
             #create mesh
@@ -237,15 +256,27 @@ class TreeGenerator():
         #get base mesh from file, also adds a tree at 0,0
         meshio.fromFile(input, None)
         
+        
         #dostuff
         for i, e in enumerate(coord):
+        
+            '''
+            # rgb tree types
+            r = coord[i][1][0]
+            g = coord[i][1][1]
+            b = coord[i][1][2]
+            # alpha tree intensity
+            a = coord[i][1][3]
+            #print "%f, %f, %f, %f" % (r, g, b, a)
+            '''
+            
             mesh2 = MeshContainer.MeshContainer()
             meshio2 = MeshIO.MeshIO(mesh2)
             
             meshio2.fromFile(input, None)
-            x = coord[i][0] * self.horScale
-            y = coord[i][1]
-            z = coord[i][2] * self.horScale
+            x = coord[i][0][0] * self.horScale
+            y = coord[i][0][1]
+            z = coord[i][0][2] * self.horScale
             
             mesh2.translate(x, y, z) # no output on x,z
             #mesh.rotate(0,0,0,0) # rotate
