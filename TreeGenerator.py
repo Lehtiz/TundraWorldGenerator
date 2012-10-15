@@ -211,7 +211,7 @@ class TreeGenerator():
                 # [index][x,y](R, G, B)
                 if vegCoord[i][0] == [adjustedX, adjustedZ]:
                     #if red
-                    if vegCoord[i][1][0] == 255
+                    if vegCoord[i][1][0] == 255:
                         y = t.getHeight(adjustedZ,adjustedX)
                         #check list incase coords were generated below the minimum height for trees
                         if y >= self.treeMinHeight and y <= self.treeMaxHeight:
