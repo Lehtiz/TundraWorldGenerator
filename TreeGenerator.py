@@ -66,7 +66,7 @@ class TreeGenerator():
             vegCoord = []
             vegCoord = self.vegMapToCoord(tileName)
             
-            self.addEntity(t, w, coordGeneral, tile, tileName, vegCoord)
+            self.createEntity(t, w, coordGeneral, tile, tileName, vegCoord)
             
         stop = datetime.datetime.now()
         print "Stopped: " + str(stop)
@@ -109,6 +109,7 @@ class TreeGenerator():
                 coord.append([[x,y],pixel])
         return coord
         
+        
     def getPixelOpacity(self, tileName, x, y):
         im = Image.open(self.inputFolder + tileName + "vegetationMap.png")
         if not 'transparency' in im.info:
@@ -118,7 +119,7 @@ class TreeGenerator():
         return pixel[3]
         
     
-    def addEntity(self, t, w, coord, tile, tileName, vegCoord):
+    def createEntity(self, t, w, coord, tile, tileName, vegCoord):
         entityCount = 0
         for j, e in enumerate(coord):
             x = coord[j][0]
@@ -131,11 +132,11 @@ class TreeGenerator():
                 
                 if name != "single": 
                     # y = 0 because createdynmesh aligns itself with 0 + height currently
-                    self.addTree(w, tile, tileName, "dynamicMesh", x, 0, z, name)
+                    self.addEntity(w, tile, tileName, "dynamicMesh", x, 0, z, name)
                     entityCount = entityCount + 1
                     
                 else:
-                    self.addTree(w, tile, tileName, "single", x, y, z)
+                    self.addEntity(w, tile, tileName, "single", x, y, z, str(j))
                     entityCount = entityCount + 1
                     
         print "Added " + str(entityCount) + " entities to " + tileName
@@ -175,7 +176,7 @@ class TreeGenerator():
         return x, y
     
     
-    def addTree(self, w, tile, tileName, type, x, y, z, meshName=""):
+    def addEntity(self, w, tile, tileName, type, x, y, z, meshName=""):
         #offset the entity coordinates to match the tile it should be on, adjust to scale
         x, z = self.locationOffset(tile, x, z)
         
@@ -210,7 +211,7 @@ class TreeGenerator():
         
         pixel = self.getPixelOpacity(tileName,x,z)
         amount = float(entityAmount) * (float(pixel) / float(255))
-        
+        print int(amount)
         for j in range(int(amount)):
             _x = random.randint(-self.groupWidth/2, self.groupWidth/2)
             _z = random.randint(-self.groupWidth/2, self.groupWidth/2)
