@@ -109,7 +109,8 @@ class TreeGenerator():
                 coord.append([[x,y],pixel])
         return coord
         
-        
+    
+    #unused    
     def getPixelOpacity(self, tileName, x, y):
         im = Image.open(self.inputFolder + tileName + "vegetationMap.png")
         if not 'transparency' in im.info:
@@ -117,7 +118,15 @@ class TreeGenerator():
         pix = im.load()
         pixel = pix[x,y]
         return pixel[3]
-        
+    
+
+    def getGroupDensity(self, tileName, x, y):
+        im = Image.open(self.inputFolder + tileName + "densityMap.png")
+        pix = im.load()
+        pixel = pix[x,y]
+        #convert to opposite, because black is considered 0 and we want black to be dense(255)
+        return 255-pixel
+    
     
     def createEntity(self, t, w, coord, tile, tileName, vegCoord):
         entityCount = 0
@@ -128,17 +137,18 @@ class TreeGenerator():
             
             if (y >= self.treeMinHeight and y <= self.treeMaxHeight):
                 #creates forest like treegroup tiles, if group has more than 1 tree
-                name = self.createDynamicGroup(t, tileName, x, z, j, vegCoord, self.treesInGroup)
+                type, name = self.createDynamicGroup(t, tileName, x, z, j, vegCoord, self.treesInGroup)
                 
-                if name != "single": 
+                if type: 
                     # y = 0 because createdynmesh aligns itself with 0 + height currently
                     self.addEntity(w, tile, tileName, "dynamicMesh", x, 0, z, name)
                     entityCount = entityCount + 1
-                    
-                else:
-                    self.addEntity(w, tile, tileName, "single", x, y, z, str(j))
+                '''
+                #what about singles?
+                if :
+                    self.addEntity(w, tile, tileName, "single", x, y, z, name)
                     entityCount = entityCount + 1
-                    
+                '''    
         print "Added " + str(entityCount) + " entities to " + tileName
 
         
@@ -182,36 +192,40 @@ class TreeGenerator():
         
         #preconfigured entity types
         if (type == "birch"):
+            name = type + meshName
             mesh = "birch.mesh"
             material = "birch3_branches.material;birch3_bark.material"
             #adjustment in y axel incase the model does not start at zero height
             modelAdjustment = 6
             
         elif (type == "single"):
+            name = type + meshName
             mesh = "tree.mesh"
             material = "tree.material"
             modelAdjustment = 0
 
         elif (type == "dynamicMesh"):
+            name = type + meshName
             mesh = self.outputFolder + meshName + "dynamicGroup.mesh"
             material = "tree.material"
             modelAdjustment = 0
             
         #random rotation?
-        w.createEntity_Staticmesh(1, type  + tileName + meshName + "_Tree"+str(w.TXML.getCurrentEntityID()),
-                                      mesh=mesh,
-                                      material=self.inputFolder + material,
-                                      transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+modelAdjustment, z))
+        w.createEntity_Staticmesh(1, name, mesh=mesh,
+                                    material=self.inputFolder + material,
+                                    transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+modelAdjustment, z))
 
 
     def createDynamicGroup(self, t, tileName, x, z, groupId, vegCoord, entityAmount):
         name = tileName + str(groupId)
         print "Generating treegroup: " + name
         coord = []
+        treeamount = 0
         
-        pixel = self.getPixelOpacity(tileName,x,z)
+        #get density from group middle coord
+        pixel = self.getGroupDensity(tileName,x,z)
         amount = float(entityAmount) * (float(pixel) / float(255))
-        print int(amount)
+        
         for j in range(int(amount)):
             _x = random.randint(-self.groupWidth/2, self.groupWidth/2)
             _z = random.randint(-self.groupWidth/2, self.groupWidth/2)
@@ -237,14 +251,16 @@ class TreeGenerator():
                             if y >= self.treeMinHeight and y <= self.treeMaxHeight:
                                 #add to coord to be generated later
                                 coord.append([[_x, y*self.verScale, _z], vegCoord[i][1]])
-        
+                                treeamount = treeamount+1
+        #amount of trees generated for testing purposes added to the groups name
+        name = name +"_"+ str(int(treeamount))
         if len(coord) > 1:
             #create mesh
             self.createDynamicMesh(name, coord)
-            return name
+            return True, name
         else:
             print "... No group needed for " + name + ", skipping"
-            return "single"
+            return False, name
     
     
     def createDynamicMesh(self, name, coord):
@@ -266,7 +282,6 @@ class TreeGenerator():
             r = coord[i][1][0]
             g = coord[i][1][1]
             b = coord[i][1][2]
-            # alpha tree intensity
             a = coord[i][1][3]
             #print "%f, %f, %f, %f" % (r, g, b, a)
             '''
