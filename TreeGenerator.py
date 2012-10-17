@@ -206,7 +206,8 @@ class TreeGenerator():
         elif (type == "dynamicMesh"):
             name = type + meshName
             mesh = self.outputFolder + meshName + "dynamicGroup.mesh"
-            material = "tree.material"
+            #material = "spruce.material;pine.material;birch.material"
+            material = "spruce.material"
             modelAdjustment = 0
             
         #random rotation?
@@ -268,7 +269,7 @@ class TreeGenerator():
     
     def createDynamicMesh(self, name, coord):
         start = datetime.datetime.now()
-        input = self.inputFolder + "tree.mesh.xml"
+        input = self.inputFolder + "spruce.mesh.xml"
         output = self.outputFolder + name + "dynamicGroup.mesh.xml"
         
         mesh = MeshContainer.MeshContainer()
@@ -289,12 +290,12 @@ class TreeGenerator():
             y = coord[i][0][1]
             z = coord[i][0][2] * self.horScale
             
-            mesh2.translate(x, y, z) # no output on x,z
+            mesh2.translate(x, y, z)
             #mesh.rotate(0,0,0,0) # rotate
             #mesh.scale(2,2,2) # scale
 
             #add last object to the meshcontainer
-            mesh.merge(mesh2, append=False) #append True, gray crossboxes
+            mesh.merge(mesh2, append=False) #append True = gray crossboxes
         
         #output
         meshio.toFile(output, overwrite=True)
@@ -306,7 +307,7 @@ class TreeGenerator():
     
     
     def chooseTreeType(self, coord, i):
-        trees = ("tree.mesh.xml", "tree2.mesh.xml", "tree3.mesh.xml")
+        trees = ("spruce.mesh.xml", "pine.mesh.xml", "birch.mesh.xml")
         #probability for each tree from rgb vegmap
         r = coord[i][1][0]
         g = coord[i][1][1]

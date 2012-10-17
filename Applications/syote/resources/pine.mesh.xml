@@ -1,0 +1,60 @@
+<mesh>
+	<submeshes>
+		<submesh material="Material#0" usesharedvertices="false" use32bitindexes="false">
+			<faces count="8">
+				<face v1="0" v2="2" v3="1" />
+				<face v1="1" v2="2" v3="3" />
+				<face v1="1" v2="2" v3="0" />
+				<face v1="3" v2="2" v3="1" />
+				<face v1="4" v2="6" v3="5" />
+				<face v1="5" v2="6" v3="7" />
+				<face v1="5" v2="6" v3="4" />
+				<face v1="7" v2="6" v3="5" />
+			</faces>
+			<geometry vertexcount="8">
+				<vertexbuffer positions="true" normals="true" colours_diffuse="false" texture_coords="1" texture_coords_dimensions_0="2">
+					<vertex>
+						<position x="0.000026" y="5.520832" z="0.965736" />
+						<texcoord u="0.000030" v="0.999983" />
+						<normal x="0.000000" y="0.000000" z="0.000000" />
+					</vertex>
+					<vertex>
+						<position x="0.000026" y="5.520832" z="-0.970648" />
+						<texcoord u="0.999881" v="0.999983" />
+						<normal x="0.000000" y="0.000000" z="0.000000" />
+					</vertex>
+					<vertex>
+						<position x="0.000026" y="0.000007" z="0.965736" />
+						<texcoord u="0.000030" v="0.000019" />
+						<normal x="0.000000" y="0.000000" z="0.000000" />
+					</vertex>
+					<vertex>
+						<position x="0.000026" y="0.000007" z="-0.970648" />
+						<texcoord u="0.999881" v="0.000019" />
+						<normal x="0.000000" y="0.000000" z="0.000000" />
+					</vertex>
+					<vertex>
+						<position x="0.832046" y="5.520832" z="0.063104" />
+						<texcoord u="0.000030" v="0.999983" />
+						<normal x="0.000000" y="0.000000" z="0.000000" />
+					</vertex>
+					<vertex>
+						<position x="-0.996780" y="5.520832" z="0.072015" />
+						<texcoord u="0.999881" v="0.999983" />
+						<normal x="0.000000" y="0.000000" z="0.000000" />
+					</vertex>
+					<vertex>
+						<position x="0.832046" y="0.000007" z="0.063104" />
+						<texcoord u="0.000030" v="0.000019" />
+						<normal x="0.000000" y="0.000000" z="0.000000" />
+					</vertex>
+					<vertex>
+						<position x="-0.996780" y="0.000007" z="0.072015" />
+						<texcoord u="0.999881" v="0.000019" />
+						<normal x="0.000000" y="0.000000" z="0.000000" />
+					</vertex>
+				</vertexbuffer>
+			</geometry>
+		</submesh>
+	</submeshes>
+</mesh>

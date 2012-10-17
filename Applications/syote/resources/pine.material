@@ -1,0 +1,17 @@
+material Material#0
+{
+	technique
+	{
+		pass
+		{
+			ambient 0.996094 0.996094 0.996094
+			diffuse 0.996094 0.996094 0.996094
+			specular 0.996094 0.996094 0.996094 1.000000
+			texture_unit
+			{
+				texture pine.tga
+			}
+		}
+	}
+}
+
