@@ -12,7 +12,6 @@ import MeshContainer
 import MeshIO
 import subprocess
 import datetime
-from threading import Thread
 
 
 class TreeGenerator():
@@ -71,7 +70,7 @@ class TreeGenerator():
         stop = datetime.datetime.now()
         print "Stopped: " + str(stop)
         print "Runtime: " + str(stop - start)
-    
+
     
     #generate a grid of coordinates
     def generateCoordGrid(self, t, tile):
@@ -91,6 +90,40 @@ class TreeGenerator():
         
         coord.sort()
         return coord
+    
+    
+    def locationOffset(self, tile, x, y, mode = 0):
+        #placement correction, generated trees to their own slice
+        if mode == 0:
+            if tile == 0:
+                x = x
+                y = y
+            elif tile == 1:
+                x = x - self.tileWidth
+                y = y
+            elif tile == 2:
+                x = x - self.tileWidth
+                y = y - self.tileWidth
+            elif tile == 3:
+                x = x
+                y = y - self.tileWidth
+            x = x * self.horScale
+            y = y * self.horScale 
+        #offset for heightcheck
+        if mode == 1:
+            if tile == 0:
+                x = x
+                y = y
+            elif tile == 1:
+                x = self.tileWidth - x
+                y = y
+            elif tile == 2:
+                x = self.tileWidth - x
+                y = self.tileWidth - y
+            elif tile == 3:
+                x = x
+                y = self.tileWidth - y
+        return x, y
     
     
     #vegmap to coord
@@ -150,42 +183,8 @@ class TreeGenerator():
                     entityCount = entityCount + 1
                 '''    
         print "Added " + str(entityCount) + " entities to " + tileName
-
         
-    def locationOffset(self, tile, x, y, mode = 0):
-        #placement correction, generated trees to their own slice
-        if mode == 0:
-            if tile == 0:
-                x = x
-                y = y
-            elif tile == 1:
-                x = x - self.tileWidth
-                y = y
-            elif tile == 2:
-                x = x - self.tileWidth
-                y = y - self.tileWidth
-            elif tile == 3:
-                x = x
-                y = y - self.tileWidth
-            x = x * self.horScale
-            y = y * self.horScale 
-        #offset for heightcheck
-        if mode == 1:
-            if tile == 0:
-                x = x
-                y = y
-            elif tile == 1:
-                x = self.tileWidth - x
-                y = y
-            elif tile == 2:
-                x = self.tileWidth - x
-                y = self.tileWidth - y
-            elif tile == 3:
-                x = x
-                y = self.tileWidth - y
-        return x, y
-    
-    
+        
     def addEntity(self, w, tile, tileName, type, x, y, z, meshName=""):
         #offset the entity coordinates to match the tile it should be on, adjust to scale
         x, z = self.locationOffset(tile, x, z)
@@ -241,19 +240,23 @@ class TreeGenerator():
                 
                 # [index][x,y](R, G, B, a)
                 if vegCoord[i][0] == [adjustedX, adjustedZ]:
+                
                     #do nothing while on green or when opacity is 0
                     if not vegCoord[i][1][3] == 0:
                         if not (vegCoord[i][1][0] == 0 and 
                                 vegCoord[i][1][1] == 255 and 
                                 vegCoord[i][1][2] == 0):
                             y = t.getHeight(adjustedZ,adjustedX)
+                            
                             #check list incase coords were generated below the minimum height for trees
                             if y >= self.treeMinHeight and y <= self.treeMaxHeight:
                                 #add to coord to be generated later
                                 coord.append([[_x, y*self.verScale, _z], vegCoord[i][1]])
                                 treeamount = treeamount+1
+                                
         #amount of trees generated for testing purposes added to the groups name
         name = name +"_"+ str(int(treeamount))
+        
         if len(coord) > 1:
             #create mesh
             self.createDynamicMesh(name, coord)
@@ -272,24 +275,16 @@ class TreeGenerator():
         meshio = MeshIO.MeshIO(mesh)
         #get base mesh from file, also adds a tree at 0,0
         meshio.fromFile(input, None)
-        
-        
+
         #dostuff
         for i, e in enumerate(coord):
-        
-            '''
-            # rgb tree types
-            r = coord[i][1][0]
-            g = coord[i][1][1]
-            b = coord[i][1][2]
-            a = coord[i][1][3]
-            #print "%f, %f, %f, %f" % (r, g, b, a)
-            '''
+            #treetype from rgb
+            input2 = self.chooseTreeType(coord, i)
             
             mesh2 = MeshContainer.MeshContainer()
             meshio2 = MeshIO.MeshIO(mesh2)
+            meshio2.fromFile(input2, None)
             
-            meshio2.fromFile(input, None)
             x = coord[i][0][0] * self.horScale
             y = coord[i][0][1]
             z = coord[i][0][2] * self.horScale
@@ -310,8 +305,31 @@ class TreeGenerator():
         print "createDynamicMesh " + name + " Runtime: " + str(stop - start)
     
     
+    def chooseTreeType(self, coord, i):
+        trees = ("tree.mesh.xml", "tree2.mesh.xml", "tree3.mesh.xml")
+        #probability for each tree from rgb vegmap
+        r = coord[i][1][0]
+        g = coord[i][1][1]
+        b = coord[i][1][2]
+        #print "%i, %i, %i" % (r, g, b)
+        changes = [r / float(255), g / float(255), b / float(255)]
+        
+        weights = []
+        for i, e in enumerate(changes):
+            if e != 0:
+                weights.append(changes[i])
+                
+        # weighted change for each type from the rgb values 255 = 100% change, 
+        # r g b 255,255,255 = trees[0], because red 100%
+        rnd = random.random() * sum(weights)
+        for i, e in enumerate(weights):
+            rnd -= e
+            if rnd < 0:
+                return self.inputFolder + trees[i]
+    
+    
     def compileDynamicMesh(self, input):
         compiler = "OgreXMLConverter.exe  -q "
-        subprocess.Popen(compiler +  input, shell=True)
+        subprocess.Popen(compiler + input, shell=True)
         
         
