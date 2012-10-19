@@ -170,7 +170,7 @@
         </vertexbuffer>
     </sharedgeometry>
     <submeshes>
-        <submesh material="AC3D/tree/Mat017_Tex00" usesharedvertices="true" use32bitindexes="false" operationtype="triangle_list">
+        <submesh material="spruce" usesharedvertices="true" use32bitindexes="false" operationtype="triangle_list">
             <faces count="6">
                 <face v1="0" v2="2" v3="4" />
                 <face v1="5" v2="3" v3="1" />
