@@ -45,7 +45,7 @@ class MeshContainer():
             self.uniqueEdges        = []
 
         def __message(self, msg):
-            print msg
+            #print msg
             return
 
         def addFace(self, f_list):
@@ -408,7 +408,7 @@ class MeshContainer():
             self.vRefCounts         = None                  # each vertex has a counter how many times
                                                             # it has been referenced from face array
         def __message(self, msg):
-            print msg
+            #print msg
             return
         def debugMinMax(self):
             return
@@ -623,7 +623,7 @@ class MeshContainer():
         self.initialize()
 
     def __message(self, msg):
-        print msg
+        #print msg
         return
 
     def initialize(self):

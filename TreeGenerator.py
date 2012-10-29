@@ -276,6 +276,7 @@ class TreeGenerator():
         meshio = MeshIO.MeshIO(mesh)
         #get base mesh from file, also adds a tree at 0,0
         meshio.fromFile(input, None)
+        mesh.toSharedgeometry()
 
         #dostuff
         for i, e in enumerate(coord):
@@ -291,11 +292,12 @@ class TreeGenerator():
             z = coord[i][0][2] * self.horScale
             
             mesh2.translate(x, y, z)
+            mesh2.toSharedgeometry()
             #mesh.rotate(0,0,0,0) # rotate
             #mesh.scale(2,2,2) # scale
-
             #add last object to the meshcontainer
-            mesh.merge(mesh2, append=False) #append True = gray crossboxes
+            mesh.merge(mesh2, append=True) #append True = gray crossboxes
+            mesh.collapseSimilars()
         
         #output
         meshio.toFile(output, overwrite=True)
