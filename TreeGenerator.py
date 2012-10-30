@@ -190,14 +190,7 @@ class TreeGenerator():
         x, z = self.locationOffset(tile, x, z)
         
         #preconfigured entity types
-        if (type == "birch"):
-            name = type + meshName
-            mesh = "birch.mesh"
-            material = "birch3_branches.material;birch3_bark.material"
-            #adjustment in y axel incase the model does not start at zero height
-            modelAdjustment = 6
-            
-        elif (type == "single"):
+        if (type == "single"):
             name = type + meshName
             mesh = "tree.mesh"
             material = "tree.material"
@@ -206,8 +199,7 @@ class TreeGenerator():
         elif (type == "dynamicMesh"):
             name = type + meshName
             mesh = self.outputFolder + meshName + "dynamicGroup.mesh"
-            #material = "spruce.material;pine.material;birch.material"
-            material = "spruce.material"
+            material = "spruce.material;pine.material;birch.material"
             modelAdjustment = 0
             
         #random rotation?
@@ -275,7 +267,7 @@ class TreeGenerator():
         mesh = MeshContainer.MeshContainer()
         meshio = MeshIO.MeshIO(mesh)
         #get base mesh from file, also adds a tree at 0,0
-        meshio.fromFile(input, None)
+        meshio.fromFile(input, "model/x-ogremesh")
         mesh.toSharedgeometry()
 
         #dostuff
@@ -285,21 +277,21 @@ class TreeGenerator():
             
             mesh2 = MeshContainer.MeshContainer()
             meshio2 = MeshIO.MeshIO(mesh2)
-            meshio2.fromFile(input2, None)
+            meshio2.fromFile(input2, "model/x-ogremesh")
+            mesh2.toSharedgeometry()
             
             x = coord[i][0][0] * self.horScale
             y = coord[i][0][1]
             z = coord[i][0][2] * self.horScale
             
             mesh2.translate(x, y, z)
-            mesh2.toSharedgeometry()
             #mesh.rotate(0,0,0,0) # rotate
             #mesh.scale(2,2,2) # scale
             #add last object to the meshcontainer
-            mesh.merge(mesh2, append=True) #append True = gray crossboxes
-            mesh.collapseSimilars()
+            mesh.merge(mesh2, append=True)
         
         #output
+        mesh.collapseSimilars()
         meshio.toFile(output, overwrite=True)
         # from .mesh.xml to .mesh
         self.compileDynamicMesh(output)
@@ -315,12 +307,12 @@ class TreeGenerator():
         g = coord[i][1][1]
         b = coord[i][1][2]
         #print "%i, %i, %i" % (r, g, b)
-        changes = [r / float(255), g / float(255), b / float(255)]
+        type = [r / float(255), g / float(255), b / float(255)]
         
         weights = []
-        for i, e in enumerate(changes):
+        for i, e in enumerate(type):
             if e != 0:
-                weights.append(changes[i])
+                weights.append(type[i])
                 
         # weighted change for each type from the rgb values 255 = 100% change, 
         # r g b 255,255,255 = trees[0], because red 100%
