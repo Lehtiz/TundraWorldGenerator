@@ -43,7 +43,7 @@ def create_assets():
         
         print "Generating material for " + i
         m = MaterialGenerator.Material(i)
-        m.createMaterial_4channelTerrain("terrain", "sand.png", "grass.png", "rock.png", "road.png", weightFile)
+        m.createMaterial_4channelTerrain("terrain", "sand.png", "grass.png", "rock.png", "", weightFile)
         materialFile = generatedFolder + i + ".material"
         m.toFile(materialFile, overwrite=True)
         
@@ -55,8 +55,6 @@ def create_assets():
     t.toImage(generatedFolder + "rock.png", "PNG", overwrite=True)
     t.createSingleColorTexture(160,136,88,70)
     t.toImage(generatedFolder + "sand.png", "PNG", overwrite=True)
-    t.createSingleColorTexture(0,0,0,255)
-    t.toImage(generatedFolder + "road.png", "PNG", overwrite=True)
         
     
 def create_world():

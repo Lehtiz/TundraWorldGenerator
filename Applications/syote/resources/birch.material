@@ -30,7 +30,7 @@ material birch
 			{
 				texture birch.tga
 				tex_address_mode clamp
-				//wave_xform rotate sine 1.0 0.2 0.9 0.02
+				wave_xform rotate sine 1.0 0.0 0.0 1.00
 			}
 		}
 		pass
@@ -48,6 +48,7 @@ material birch
 			{
 				tex_address_mode clamp
 				texture birch.tga
+				wave_xform rotate sine 1.0 0.0 0.0 1.00
 			}
 		}
 
