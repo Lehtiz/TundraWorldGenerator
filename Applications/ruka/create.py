@@ -13,7 +13,7 @@ env_prefix     = ""
 
 resourcesFolder  = "./resources/"
 generatedFolder = "./generated/"
-terrainSlice = "S5422B", "T5311A", "T5133G", "S5244H"
+terrainSlice = "S5244H", "T5133G", "T5311A", "S5422B"
 terrainSuffix = ".xyz"
 
 patchSize = 0
@@ -31,6 +31,7 @@ def create_assets():
         t = TerrainGenerator.TerrainGenerator()
         t.fromFile(inputFile)
         t.adjustHeight(-290.0)
+        t.mirror(mirrorX=True, mirrorY=False)
         outputFile = generatedFolder + i + ".ntf" 
         t.toFile(outputFile, overwrite=True)
         
