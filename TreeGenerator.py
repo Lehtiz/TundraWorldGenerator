@@ -1,6 +1,12 @@
 #!/usr/bin/python
+
 ####
-# 
+# usage example
+#
+#    tree = TreeGenerator.TreeGenerator(generatedFolder, resourcesFolder, terrainSlice, tileWidth, verScale, horScale, 
+#                                       "spruce.mesh.xml", "pine.mesh.xml", "birch.mesh.xml",
+#                                       "spruce.material", "pine.material", "birch.material")
+#    tree.createForest(w)
 # 
 # 
 ####
@@ -17,6 +23,8 @@ import datetime
 class TreeGenerator():
 
     def __init__(self, outputFolder, inputFolder, terrainSlice, tileWidth, verScale, horScale, 
+                     tree1, tree2, tree3, 
+                     treetex1, treetex2, treetex3, 
                      treeMinHeight=None, treeMaxHeight=None, groupWidth = None, treesInGroup = None):
         
         self.outputFolder = outputFolder
@@ -30,12 +38,21 @@ class TreeGenerator():
         self.verScale = verScale
         self.horScale = horScale
         
+        #treetypes
+        self.tree1 = tree1
+        self.tree2 = tree2
+        self.tree3 = tree3
+        self.treetex1 = treetex1
+        self.treetex2 = treetex2
+        self.treetex3 = treetex3
+             
         # min height where trees can appear
         self.treeMinHeight = treeMinHeight
         # max, beyond this point there will be no trees
         self.treeMaxHeight = treeMaxHeight
+        #width of the forest tiles
         self.groupWidth = groupWidth
-        
+        #max abount of trees allowed in a group
         self.treesInGroup = treesInGroup
         
         #default values
@@ -50,7 +67,7 @@ class TreeGenerator():
         self.subSlice = tileWidth / self.groupWidth
     
     
-    def addStuff(self, w):
+    def createForest(self, w):
         start = datetime.datetime.now()
         print "Started: " + str(start)
         print "Generating trees..."
@@ -65,13 +82,12 @@ class TreeGenerator():
             vegCoord = []
             vegCoord = self.vegMapToCoord(tileName)
             
-            self.createEntity(t, w, coordGeneral, tile, tileName, vegCoord)
+            self.createForestPatch(t, w, coordGeneral, tile, tileName, vegCoord)
             
         stop = datetime.datetime.now()
         print "Stopped: " + str(stop)
         print "Runtime: " + str(stop - start)
 
-    
     #generate a grid of coordinates
     def generateCoordGrid(self, t, tile):
         coord = []
@@ -141,18 +157,8 @@ class TreeGenerator():
                 pixel = pix[x,y]
                 coord.append([[x,y],pixel])
         return coord
-        
     
-    #unused    
-    def getPixelOpacity(self, tileName, x, y):
-        im = Image.open(self.inputFolder + tileName + "vegetationMap.png")
-        if not 'transparency' in im.info:
-            im = im.convert('RGBA')
-        pix = im.load()
-        pixel = pix[x,y]
-        return pixel[3]
     
-
     def getGroupDensity(self, tileName, x, y):
         im = Image.open(self.inputFolder + tileName + "densityMap.png")
         pix = im.load()
@@ -161,7 +167,7 @@ class TreeGenerator():
         return 255-pixel
     
     
-    def createEntity(self, t, w, coord, tile, tileName, vegCoord):
+    def createForestPatch(self, t, w, coord, tile, tileName, vegCoord):
         entityCount = 0
         for j, e in enumerate(coord):
             x = coord[j][0]
@@ -169,45 +175,40 @@ class TreeGenerator():
             z = coord[j][2]
             
             if (y >= self.treeMinHeight and y <= self.treeMaxHeight):
-                #creates forest like treegroup tiles, if group has more than 1 tree
-                type, name = self.createDynamicGroup(t, tileName, x, z, j, vegCoord, self.treesInGroup)
+                #creates forest-like treegroup tiles, if group has more than 1 tree
+                group, name = self.createDynamicGroup(t, tileName, x, z, j, vegCoord, self.treesInGroup)
                 
-                if type: 
+                #make sure a group was created
+                if group: 
                     # y = 0 because createdynmesh aligns itself with 0 + height currently
                     self.addEntity(w, tile, tileName, "dynamicMesh", x, 0, z, name)
                     entityCount = entityCount + 1
-                '''
-                #what about singles?
-                if :
-                    self.addEntity(w, tile, tileName, "single", x, y, z, name)
-                    entityCount = entityCount + 1
-                '''    
+                    
         print "Added " + str(entityCount) + " entities to " + tileName
         
-        
+    #Outputs entities to txml
     def addEntity(self, w, tile, tileName, type, x, y, z, meshName=""):
         #offset the entity coordinates to match the tile it should be on, adjust to scale
         x, z = self.locationOffset(tile, x, z)
         
         #preconfigured entity types
-        if (type == "single"):
-            name = type + meshName
-            mesh = "tree.mesh"
-            material = "tree.material"
-            modelAdjustment = 0
-
-        elif (type == "dynamicMesh"):
+        if (type == "dynamicMesh"):
             name = type + meshName
             mesh = self.outputFolder + meshName + "dynamicGroup.mesh"
-            material = "spruce.material;pine.material;birch.material"
+            material = self.treetex1 + ";" + self.treetex2 + ";" + self.treetex3
+            modelAdjustment = 0
+        
+        elif (type == "single"):
+            name = type + meshName
+            mesh = self.tree1
+            material = self.treetex1
             modelAdjustment = 0
             
-        #random rotation?
         w.createEntity_Staticmesh(1, name, mesh=mesh,
                                     material=self.inputFolder + material,
                                     transform="%f,%f,%f,0,0,0,1,1,1" % (x, y+modelAdjustment, z))
 
-
+    #Adds trees in the defined area and specifies their type
     def createDynamicGroup(self, t, tileName, x, z, groupId, vegCoord, entityAmount):
         name = tileName + str(groupId)
         print "Generating treegroup: " + name
@@ -225,7 +226,7 @@ class TreeGenerator():
             adjustedZ = _z+z
             
             #make sure created object fits inside a tiles parameters, (otherwise we'll have floating trees)
-            if ( 0 <= adjustedX <= self.tileWidth and 0 <= adjustedZ <= self.tileWidth):
+            if (0 <= adjustedX <= self.tileWidth and 0 <= adjustedZ <= self.tileWidth):
                 
                 # only add trees if over red in vegmap
                 # figure out the index where we want to check for trees
@@ -242,7 +243,7 @@ class TreeGenerator():
                             y = t.getHeight(adjustedZ,adjustedX)
                             
                             #check list incase coords were generated below the minimum height for trees
-                            if y >= self.treeMinHeight and y <= self.treeMaxHeight:
+                            if (y >= self.treeMinHeight and y <= self.treeMaxHeight):
                                 #add to coord to be generated later
                                 coord.append([[_x, y*self.verScale, _z], vegCoord[i][1]])
                                 treeamount = treeamount+1
@@ -255,13 +256,13 @@ class TreeGenerator():
             self.createDynamicMesh(name, coord)
             return True, name
         else:
-            print "... No group needed for " + name + ", skipping"
+            #print "... No group needed for " + name + ", skipping"
             return False, name
     
-    
+    #creates .mesh.xml from createDynamicGroup
     def createDynamicMesh(self, name, coord):
         start = datetime.datetime.now()
-        input = self.inputFolder + "spruce.mesh.xml"
+        input = self.inputFolder + self.tree1
         output = self.outputFolder + name + "dynamicGroup.mesh.xml"
         
         mesh = MeshContainer.MeshContainer()
@@ -270,7 +271,6 @@ class TreeGenerator():
         meshio.fromFile(input, "model/x-ogremesh")
         mesh.toSharedgeometry()
 
-        #dostuff
         for i, e in enumerate(coord):
             #treetype from rgb
             input2 = self.chooseTreeType(coord, i)
@@ -301,7 +301,7 @@ class TreeGenerator():
     
     
     def chooseTreeType(self, coord, i):
-        trees = ("spruce.mesh.xml", "pine.mesh.xml", "birch.mesh.xml")
+        trees = (self.tree1, self.tree2, self.tree3)
         #probability for each tree from rgb vegmap
         r = coord[i][1][0]
         g = coord[i][1][1]
