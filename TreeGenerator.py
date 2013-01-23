@@ -32,7 +32,7 @@ class TreeGenerator():
         
         # string tuple containing the names of the tiles
         self.terrainSlice = terrainSlice
-        # int containing the width and lenght of a tile
+        # int containing the width of a tile
         self.tileWidth = tileWidth
         #scaling factors
         self.verScale = verScale
